@@ -1,62 +1,67 @@
 <?php
 session_start();
 
-// 1. Config BDD
+// 1. Configuration (Base de données)
 require_once '../config/database.php';
 
-// 2. IMPORTANT : On inclut la définition de la classe AuthController
+// 2. Inclusion des définitions de classes (Tes Contrôleurs)
 require_once '../controllers/AuthController.php';
+require_once '../controllers/GalleryController.php'; // <--- NOUVEAU
 
-// 3. On instancie l'objet (on prépare le contrôleur)
+// 3. Instanciation des objets
 $auth = new AuthController();
+$gallery = new GalleryController(); // <--- NOUVEAU
 
-// 4. Récupération de l'URL
+// 4. Analyse de l'URL
 $url = $_SERVER['REQUEST_URI'];
 $path = parse_url($url, PHP_URL_PATH);
 
-// 5. Routeur (Switch mis à jour)
+// 5. Routeur (Le Switch)
 switch ($path) {
-    case '/':
-        // Exemple : Redirection si pas connecté (optionnel selon ton besoin)
-        /* if (!isset($_SESSION['user_id'])) {
-            header('Location: /login');
-            exit;
-        }
-        */
-        require '../views/home.php'; 
-        break;
-
-    // --- ROUTES D'AUTHENTIFICATION (Via l'objet $auth) ---
     
-    case '/login':
-        // On n'appelle plus 'require login.php', mais la méthode login() de l'objet
-        $auth->login(); 
+    // --- ACCUEIL ---
+    case '/':
+        require '../views/home.php';
         break;
 
+    // --- DOMAINE : AUTHENTIFICATION ---
+    case '/login':
+        $auth->login();
+        break;
     case '/register':
         $auth->register();
         break;
-        
     case '/logout':
         $auth->logout();
         break;
-
     case '/verify':
         $auth->verify();
         break;
 
-    // --- AUTRES ROUTES (Restent classiques pour l'instant) ---
+    // --- DOMAINE : GALERIE (Mise à jour ici) ---
     
     case '/gallery':
-        // Si tu n'as pas encore de GalleryController, tu gardes l'ancien système ici
-        require '../controllers/gallery.php';
+        // AVANT : require '../controllers/gallery.php';
+        // MAINTENANT : On appelle la méthode qui affiche la liste
+        $gallery->index(); 
         break;
 
+    case '/like':
+        // Nouvelle route pour liker une image
+        $gallery->like(); 
+        break;
+
+    case '/comment':
+        // Nouvelle route pour commenter
+        $gallery->comment(); 
+        break;
+
+    // --- DOMAINE : ÉDITEUR (Pas encore converti en objet) ---
     case '/editor':
-        // Vérification de sécurité (Auth) à ajouter ici
         require '../controllers/editor.php';
         break;
 
+    // --- ERREUR ---
     default:
         http_response_code(404);
         echo "404 Not Found";
