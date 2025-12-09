@@ -1,31 +1,35 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>Inscription - Camagru</title>
-    <link rel="stylesheet" href="/css/style.css"> 
-</head>
-<body>
-    <div class="container">
-        <h2>Inscription</h2>
-        <?php if (isset($error) && $error): ?>
-            <p style="color: red;"><?= $error ?></p>
-        <?php endif; ?>
+<?php include __DIR__ . '/../layout/header.php'; ?>
+
+<div class="auth-wrapper">
+    <h2>Inscription</h2>
+    
+    <?php if (isset($error) && $error): ?>
+        <div class="alert alert-error"><?= $error ?></div>
+    <?php endif; ?>
+
+    <form method="POST" action="/register">
+        <div class="form-group">
+            <label for="username">Nom d'utilisateur</label>
+            <input type="text" id="username" name="username" required placeholder="Ex: JeanDupont">
+        </div>
         
-        <form method="POST" action="/register">
-            <label>Nom d'utilisateur :</label>
-            <input type="text" name="username" required>
-            
-            <label>Email :</label>
-            <input type="email" name="email" required>
-            
-            <label>Mot de passe :</label>
-            <input type="password" name="password" required>
-            <small>Min 8 chars, 1 Majuscule, 1 Chiffre</small>
-            
-            <button type="submit">S'inscrire</button>
-        </form>
-        <p>Déjà un compte ? <a href="/login">Se connecter</a></p>
-    </div>
-</body>
-</html>
+        <div class="form-group">
+            <label for="email">Adresse Email</label>
+            <input type="email" id="email" name="email" required placeholder="Ex: jean@mail.com">
+        </div>
+        
+        <div class="form-group">
+            <label for="password">Mot de passe</label>
+            <input type="password" id="password" name="password" required>
+            <small>Min. 8 caractères, 1 majuscule, 1 chiffre.</small>
+        </div>
+        
+        <button type="submit" class="btn btn-blue" style="width: 100%;">S'inscrire</button>
+    </form>
+    
+    <p style="margin-top: 20px; text-align: center;">
+        Déjà un compte ? <a href="/login" style="color: #2980b9; font-weight: bold;">Se connecter</a>
+    </p>
+</div>
+
+<?php include __DIR__ . '/../layout/footer.php'; ?>

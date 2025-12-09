@@ -1,41 +1,32 @@
-<?php 
-// Inclusion de l'entête global (Navigation, CSS, Ouverture du Body)
-include __DIR__ . '/layout/header.php'; 
-?>
+<?php include __DIR__ . '/layout/header.php'; ?>
 
-<div class="hero-section">
-    <div class="hero-content">
-        <h1>Bienvenue sur Camagru 📷</h1>
-        <p>L'application ultime pour éditer vos photos avec des filtres funs et les partager avec la communauté !</p>
-        
-        <div class="cta-buttons">
-            <?php if (isset($_SESSION['user_id'])): ?>
-                <a href="/editor" class="btn btn-primary">📸 Aller au Studio</a>
-                <a href="/gallery" class="btn btn-secondary">Voir la Galerie</a>
-            <?php else: ?>
-                <a href="/register" class="btn btn-primary">Créer un compte</a>
-                <a href="/login" class="btn btn-secondary">Se connecter</a>
-            <?php endif; ?>
-        </div>
+<section class="hero">
+    <h1>Bienvenue sur Camagru</h1>
+    <p>Le studio photo social le plus cool du web.</p>
+    
+    <div class="hero-buttons">
+        <?php if (isset($_SESSION['user_id'])): ?>
+            <a href="/editor" class="btn">Aller au Studio 📸</a>
+        <?php else: ?>
+            <a href="/register" class="btn">Créer un compte</a>
+            <a href="/login" class="btn btn-outline">Se connecter</a>
+        <?php endif; ?>
     </div>
-</div>
+</section>
 
-<div class="features-grid">
+<section class="features">
     <div class="feature-card">
-        <h3>📸 Webcam & Upload</h3>
-        <p>Utilisez votre webcam ou importez vos images pour commencer.</p>
+        <h3>📷 Webcam</h3>
+        <p>Prenez des photos directement depuis votre navigateur.</p>
     </div>
     <div class="feature-card">
-        <h3>✨ Filtres Superposés</h3>
-        <p>Ajoutez des stickers et des cadres funs sur vos photos.</p>
+        <h3>✨ Montages</h3>
+        <p>Ajoutez des superpositions funs sur vos images.</p>
     </div>
     <div class="feature-card">
-        <h3>❤️ Galerie Sociale</h3>
-        <p>Partagez vos créations, likez et commentez celles des autres.</p>
+        <h3>❤️ Partage</h3>
+        <p>Publiez vos créations et échangez avec la communauté.</p>
     </div>
-</div>
+</section>
 
-<?php 
-// Inclusion du pied de page global (Fermeture du Body/HTML)
-include __DIR__ . '/layout/footer.php'; 
-?>
+<?php include __DIR__ . '/layout/footer.php'; ?>
