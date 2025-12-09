@@ -11,21 +11,21 @@ services:
       - .env
 
   db:
-    image: mysql:5.7
-    platform: linux/amd64
+    image: mariadb:11.8  # La dernière LTS (Stable & Récente)
+    restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword # Pour l'admin
+      MYSQL_ROOT_PASSWORD: rootpassword
       MYSQL_DATABASE: camagru
-      MYSQL_USER: camagru_user      # Nom d'utilisateur pour ton site
-      MYSQL_PASSWORD: user_password # Mot de passe pour ton site
+      MYSQL_USER: camagru_user
+      MYSQL_PASSWORD: user_password
     volumes:
       - db_data:/var/lib/mysql
 
   mailhog:
     image: mailhog/mailhog
     ports:
-      - "1025:1025" # Serveur SMTP
-      - "8025:8025" # Interface Web pour voir les mails
+      - "1025:1025"
+      - "8025:8025"
 
 volumes:
   db_data:
