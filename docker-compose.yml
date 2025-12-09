@@ -22,5 +22,11 @@ services:
     volumes:
       - db_data:/var/lib/mysql
 
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "1025:1025" # Serveur SMTP
+      - "8025:8025" # Interface Web pour voir les mails
+
 volumes:
   db_data:
