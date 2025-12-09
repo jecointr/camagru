@@ -1,58 +1,80 @@
 <?php
-require_once __DIR__ . '/../models/ImageProcessor.php';
-require_once __DIR__ . '/../models/Image.php'; // Modèle BDD simple (insert)
+require_once ROOT . '/config/database.php';
 
 class EditorController {
-    
+
     public function index() {
+        // Sécurité : Seulement si connecté
         if (!isset($_SESSION['user_id'])) {
             header('Location: /login');
             exit;
         }
-        // Ici, tu devrais aussi charger les anciennes images de l'utilisateur
-        // $images = (new Image())->getByUser($_SESSION['user_id']);
-        require __DIR__ . '/../views/editor.php';
+        require VIEWS . '/editor.php';
     }
 
     public function save() {
         header('Content-Type: application/json');
-        
+
         if (!isset($_SESSION['user_id'])) {
             echo json_encode(['success' => false, 'error' => 'Non connecté']);
             exit;
         }
 
-        // Récupération du JSON brut (car fetch envoie du JSON, pas du $_POST standard)
+        // Lire le JSON reçu
         $input = json_decode(file_get_contents('php://input'), true);
-        
-        if (isset($input['image']) && isset($input['filter'])) {
-            
-            // Sécurité : Vérifier que le filtre est légitime (pas de ../../../etc/passwd)
-            $allowed_filters = ['glasses.png', 'hat.png', 'tree.png'];
-            if (!in_array($input['filter'], $allowed_filters)) {
-                echo json_encode(['success' => false, 'error' => 'Filtre invalide']);
-                exit;
-            }
 
-            $filterPath = __DIR__ . '/../public/img/filters/' . $input['filter'];
-            
-            $processor = new ImageProcessor();
-            $filename = $processor->mergeAndSave($input['image'], $filterPath, $_SESSION['user_id']);
-
-            if ($filename) {
-                // Sauvegarde en BDD
-                // Supposons une classe Image avec une méthode save($userId, $path)
-                $db = Database::getInstance();
-                $stmt = $db->prepare("INSERT INTO images (user_id, image_path) VALUES (?, ?)");
-                $stmt->execute([$_SESSION['user_id'], $filename]);
-                
-                echo json_encode(['success' => true, 'filename' => $filename]);
-            } else {
-                echo json_encode(['success' => false, 'error' => 'Erreur traitement image']);
-            }
-        } else {
+        if (!isset($input['image']) || !isset($input['filter'])) {
             echo json_encode(['success' => false, 'error' => 'Données manquantes']);
+            exit;
+        }
+
+        // 1. Décoder l'image Base64 (Webcam)
+        $data = explode(',', $input['image']);
+        $base64 = end($data);
+        $sourceImage = imagecreatefromstring(base64_decode($base64));
+        if (!$sourceImage) {
+            echo json_encode(['success' => false, 'error' => 'Image invalide']);
+            exit;
+        }
+
+        // 2. Charger le filtre (Sticker)
+        // ATTENTION : Tu dois créer ce dossier et y mettre des images !
+        $filterName = basename($input['filter']); // Sécurité path traversal
+        $filterPath = ROOT . '/public/img/filters/' . $filterName;
+
+        if (file_exists($filterPath)) {
+            $filterImage = imagecreatefrompng($filterPath);
+            
+            // Préserver la transparence
+            imagealphablending($filterImage, true);
+            imagesavealpha($filterImage, true);
+            
+            // Superposition (Centré pour l'exemple)
+            // En bonus, tu pourrais gérer le X/Y envoyé par le JS
+            $dst_x = (imagesx($sourceImage) - imagesx($filterImage)) / 2;
+            $dst_y = (imagesy($sourceImage) - imagesy($filterImage)) / 2;
+            
+            imagecopy($sourceImage, $filterImage, $dst_x, $dst_y, 0, 0, imagesx($filterImage), imagesy($filterImage));
+            imagedestroy($filterImage);
+        }
+
+        // 3. Sauvegarder le résultat
+        $filename = uniqid('img_') . '.png';
+        $uploadDir = ROOT . '/public/uploads/';
+        
+        if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
+        
+        $savePath = $uploadDir . $filename;
+        imagepng($sourceImage, $savePath);
+        imagedestroy($sourceImage);
+
+        // 4. Inserer en Base de Données
+        $db = Database::getInstance();
+        $stmt = $db->prepare("INSERT INTO images (user_id, image_path) VALUES (?, ?)");
+        if ($stmt->execute([$_SESSION['user_id'], $filename])) {
+            echo json_encode(['success' => true, 'filename' => $filename]);
+        } else {
+            echo json_encode(['success' => false, 'error' => 'Erreur SQL']);
         }
     }
 }
-?>
