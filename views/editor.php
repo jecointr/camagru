@@ -1,4 +1,4 @@
-<div class="editor-container">
+<!-- <div class="editor-container">
     <div class="main-section">
         <div class="video-wrapper">
             <video id="video" autoplay playsinline></video>
@@ -34,4 +34,19 @@
     </div>
 </div>
 
+<script src="/js/camera.js"></script> -->
+
+<?php include __DIR__ . '/../layout/header.php'; ?>
+
+<h1>Studio de création</h1>
+
+<div class="editor-container">
+    <div class="main-section">
+        </div>
+    <div class="side-section">
+        </div>
+</div>
+
 <script src="/js/camera.js"></script>
+
+<?php include __DIR__ . '/../layout/footer.php'; ?>

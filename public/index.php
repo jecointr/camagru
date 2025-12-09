@@ -1,70 +1,91 @@
 <?php
 session_start();
 
-// 1. Configuration (Base de données)
-require_once '../config/database.php';
+// Définition des chemins absolus
+define('ROOT', dirname(__DIR__));
+define('CONTROLLERS', ROOT . '/controllers');
+define('VIEWS', ROOT . '/views');
 
-// 2. Inclusion des définitions de classes (Tes Contrôleurs)
-require_once '../controllers/AuthController.php';
-require_once '../controllers/GalleryController.php'; // <--- NOUVEAU
+// Config BDD
+require_once ROOT . '/config/database.php';
 
-// 3. Instanciation des objets
-$auth = new AuthController();
-$gallery = new GalleryController(); // <--- NOUVEAU
+// Nettoyage de l'URL pour le routing
+$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+// Si l'app est dans un sous-dossier, on le retire (optionnel mais prudent)
+$scriptDir = dirname($_SERVER['SCRIPT_NAME']);
+$path = str_replace($scriptDir, '', $uri);
+$path = '/' . ltrim($path, '/'); // Assure qu'on commence par /
 
-// 4. Analyse de l'URL
-$url = $_SERVER['REQUEST_URI'];
-$path = parse_url($url, PHP_URL_PATH);
-
-// 5. Routeur (Le Switch)
+// ROUTEUR
 switch ($path) {
-    
+    // --- INFRA ---
+    case '/setup':
+        require ROOT . '/config/setup.php';
+        break;
+
     // --- ACCUEIL ---
     case '/':
-        require '../views/home.php';
+    case '/home':
+        require VIEWS . '/home.php';
         break;
 
-    // --- DOMAINE : AUTHENTIFICATION ---
+    // --- AUTHENTIFICATION ---
     case '/login':
-        $auth->login();
+        require CONTROLLERS . '/AuthController.php';
+        (new AuthController())->login();
         break;
     case '/register':
-        $auth->register();
+        require CONTROLLERS . '/AuthController.php';
+        (new AuthController())->register();
         break;
     case '/logout':
-        $auth->logout();
+        require CONTROLLERS . '/AuthController.php';
+        (new AuthController())->logout();
         break;
     case '/verify':
-        $auth->verify();
+        require CONTROLLERS . '/AuthController.php';
+        (new AuthController())->verify();
+        break;
+    case '/forgot-password':
+        require CONTROLLERS . '/AuthController.php';
+        (new AuthController())->forgotPassword();
+        break;
+    case '/reset-password':
+        require CONTROLLERS . '/AuthController.php';
+        (new AuthController())->resetPassword();
         break;
 
-    // --- DOMAINE : GALERIE (Mise à jour ici) ---
-    
+    // --- GALERIE ---
     case '/gallery':
-        // AVANT : require '../controllers/gallery.php';
-        // MAINTENANT : On appelle la méthode qui affiche la liste
-        $gallery->index(); 
+        require CONTROLLERS . '/GalleryController.php';
+        (new GalleryController())->index();
         break;
-
     case '/like':
-        // Nouvelle route pour liker une image
-        $gallery->like(); 
+        require CONTROLLERS . '/GalleryController.php';
+        (new GalleryController())->like();
         break;
-
     case '/comment':
-        // Nouvelle route pour commenter
-        $gallery->comment(); 
+        require CONTROLLERS . '/GalleryController.php';
+        (new GalleryController())->comment();
         break;
 
-    // --- DOMAINE : ÉDITEUR (Pas encore converti en objet) ---
+    // --- EDITOR ---
     case '/editor':
-        require '../controllers/editor.php';
+        require CONTROLLERS . '/EditorController.php';
+        (new EditorController())->index();
+        break;
+    case '/save-image': // Pour l'AJAX
+        require CONTROLLERS . '/EditorController.php';
+        (new EditorController())->save();
         break;
 
-    // --- ERREUR ---
+    // --- 404 ---
     default:
         http_response_code(404);
-        echo "404 Not Found";
+        // On essaie d'afficher le header si possible, sinon juste du texte
+        if (file_exists(VIEWS . '/layout/header.php')) include VIEWS . '/layout/header.php';
+        echo "<div class='container'><h1>404 - Page introuvable</h1></div>";
+        if (file_exists(VIEWS . '/layout/footer.php')) include VIEWS . '/layout/footer.php';
         break;
 }
 ?>

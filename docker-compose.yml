@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   web:
     build: .
@@ -14,11 +12,12 @@ services:
 
   db:
     image: mysql:5.7
+    platform: linux/amd64
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-      MYSQL_DATABASE: ${DB_NAME}
-      MYSQL_USER: ${DB_USER}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: rootpassword # Pour l'admin
+      MYSQL_DATABASE: camagru
+      MYSQL_USER: camagru_user      # Nom d'utilisateur pour ton site
+      MYSQL_PASSWORD: user_password # Mot de passe pour ton site
     volumes:
       - db_data:/var/lib/mysql
 
