@@ -8,8 +8,17 @@ class User {
         $this->db = Database::getInstance();
     }
 
+    // Vérifier si un utilisateur existe déjà (pour l'inscription)
+    public function userExists($username, $email) {
+        $sql = "SELECT id FROM users WHERE username = ? OR email = ?";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$username, $email]);
+        return $stmt->fetch();
+    }
+
+    // Créer un nouvel utilisateur
     public function create($username, $email, $password, $token) {
-        // Le hashage est OBLIGATOIRE pour la sécurité
+        // Hashage du mot de passe (Sécurité Mandatory)
         $hashed_password = password_hash($password, PASSWORD_BCRYPT);
         
         $sql = "INSERT INTO users (username, email, password, token) VALUES (?, ?, ?, ?)";
@@ -17,39 +26,59 @@ class User {
         try {
             return $stmt->execute([$username, $email, $hashed_password, $token]);
         } catch (PDOException $e) {
-            // Gestion des doublons (username ou email déjà pris)
             return false;
         }
     }
 
+    // Connexion utilisateur
     public function login($username, $password) {
         $sql = "SELECT * FROM users WHERE username = ?";
         $stmt = $this->db->prepare($sql);
         $stmt->execute([$username]);
         $user = $stmt->fetch();
 
+        // Vérification du hash
         if ($user && password_verify($password, $user['password'])) {
+            // Vérification de l'email (Mandatory)
             if ($user['is_verified'] == 0) {
                 return "NOT_VERIFIED";
             }
-            return $user; // Retourne toutes les infos de l'utilisateur
+            return $user;
         }
         return false;
     }
 
+    // Validation du compte par email
     public function verifyAccount($token) {
         $sql = "UPDATE users SET is_verified = 1, token = NULL WHERE token = ?";
         $stmt = $this->db->prepare($sql);
         $stmt->execute([$token]);
         return $stmt->rowCount() > 0;
     }
-    
-    // Pour vérifier si un email/user existe déjà (utile pour les formulaires)
-    public function userExists($username, $email) {
-        $sql = "SELECT id FROM users WHERE username = ? OR email = ?";
+
+    // --- Fonctions pour Reset Password ---
+
+    public function setTokenByEmail($email, $token) {
+        $sql = "UPDATE users SET token = ? WHERE email = ?";
         $stmt = $this->db->prepare($sql);
-        $stmt->execute([$username, $email]);
-        return $stmt->fetch();
+        $stmt->execute([$token, $email]);
+        return $stmt->rowCount() > 0;
+    }
+
+    public function resetPassword($token, $newPassword) {
+        // Vérifie le token
+        $sql = "SELECT id FROM users WHERE token = ?";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$token]);
+        $user = $stmt->fetch();
+
+        if ($user) {
+            $hash = password_hash($newPassword, PASSWORD_BCRYPT);
+            // Met à jour mdp et supprime le token
+            $update = $this->db->prepare("UPDATE users SET password = ?, token = NULL WHERE id = ?");
+            return $update->execute([$hash, $user['id']]);
+        }
+        return false;
     }
 }
 ?>
