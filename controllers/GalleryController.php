@@ -6,57 +6,59 @@ class GalleryController {
     public function index() {
         $galleryModel = new Gallery();
         
-        // Pagination
-        $limit = 6; // Images par page
+        $limit = 6;
         $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
         if ($page < 1) $page = 1;
         $offset = ($page - 1) * $limit;
 
         $images = $galleryModel->getImages($limit, $offset);
-        $totalImages = $galleryModel->countImages();
-        $totalPages = ceil($totalImages / $limit);
-
-        // On prépare les données supplémentaires (Likes, Comments) pour chaque image
-        // (Note: C'est un peu "lourd" en requêtes, mais simple et efficace pour ce projet)
+        
+        // Enrichissement des données
         foreach ($images as &$img) {
             $img['likes'] = $galleryModel->getLikeCount($img['id']);
             $img['comments'] = $galleryModel->getComments($img['id']);
         }
 
+        // --- GESTION AJAX ---
+        if (isset($_GET['ajax']) && $_GET['ajax'] == 1) {
+            header('Content-Type: application/json');
+            echo json_encode([
+                'success' => true,
+                'images' => $images,
+                // S'il y a autant d'images que la limite, on suppose qu'il y a une page suivante
+                'next_page' => (count($images) === $limit) ? $page + 1 : null
+            ]);
+            exit;
+        }
+
+        // --- AFFICHAGE STANDARD ---
+        $totalImages = $galleryModel->countImages();
+        $totalPages = ceil($totalImages / $limit);
+        
         require VIEWS . '/gallery.php';
     }
 
     public function like() {
         header('Content-Type: application/json');
-        
         if (!isset($_SESSION['user_id'])) {
             http_response_code(401);
-            echo json_encode(['success' => false, 'error' => 'Non authentifié']);
-            exit;
+            echo json_encode(['success' => false, 'error' => 'Non authentifié']); exit;
         }
 
         if (isset($_POST['image_id'])) {
             $model = new Gallery();
-            $status = $model->toggleLike($_SESSION['user_id'], $_POST['image_id']); // Assumons que toggleLike retourne 'liked' ou 'unliked'
-
-            // Récupérer le nouveau compte pour l'envoyer au client
+            $status = $model->toggleLike($_SESSION['user_id'], $_POST['image_id']);
             $newCount = $model->getLikeCount($_POST['image_id']);
-
-            echo json_encode(['success' => true, 'status' => $status, 'new_count' => $newCount]);
-            exit;
+            echo json_encode(['success' => true, 'status' => $status, 'new_count' => $newCount]); exit;
         }
-        http_response_code(400);
-        echo json_encode(['success' => false, 'error' => 'ID image manquant']);
-        exit;
+        echo json_encode(['success' => false]); exit;
     }
 
     public function comment() {
         header('Content-Type: application/json');
-        
         if (!isset($_SESSION['user_id'])) {
             http_response_code(401);
-            echo json_encode(['success' => false, 'error' => 'Non authentifié']);
-            exit;
+            echo json_encode(['success' => false, 'error' => 'Non authentifié']); exit;
         }
 
         if (isset($_POST['image_id']) && !empty($_POST['comment'])) {
@@ -66,48 +68,40 @@ class GalleryController {
 
             if ($model->addComment($_SESSION['user_id'], $imageId, $comment)) {
                 
-                // (La logique d'envoi de mail de notification reste ici, elle est asynchrone)
+                // --- NOTIFICATION EMAIL ---
                 $owner = $model->getImageOwner($imageId);
-                // ... (Logique d'envoi de mail) ...
+                if ($owner && $owner['notification_active'] && $owner['email']) {
+                    $subject = "Nouveau commentaire sur Camagru";
+                    $message = "Une nouvelle personne a commenté votre photo :\n\n\"$comment\"\n\nConnectez-vous pour voir !";
+                    $headers = "From: no-reply@camagru.fr";
+                    mail($owner['email'], $subject, $message, $headers);
+                }
                 
-                // On renvoie les données du nouveau commentaire pour l'affichage
                 echo json_encode([
                     'success' => true,
                     'comment' => $comment,
-                    'username' => $_SESSION['username'], // On récupère le pseudo de la session
-                    'timestamp' => time() // Horodatage pour affichage (optionnel)
-                ]);
-                exit;
+                    'username' => $_SESSION['username'],
+                    'timestamp' => time()
+                ]); exit;
             }
         }
-        http_response_code(400);
-        echo json_encode(['success' => false, 'error' => 'Données manquantes ou erreur BDD']);
-        exit;
+        echo json_encode(['success' => false]); exit;
     }
 
     public function delete() {
         header('Content-Type: application/json');
-
         if (!isset($_SESSION['user_id'])) {
             http_response_code(401);
-            echo json_encode(['success' => false, 'error' => 'Non authentifié']);
-            exit;
+            echo json_encode(['success' => false, 'error' => 'Non authentifié']); exit;
         }
 
         if (isset($_POST['image_id'])) {
             $model = new Gallery();
-            
             if ($model->deleteImage($_POST['image_id'], $_SESSION['user_id'])) {
-                echo json_encode(['success' => true]);
-                exit;
-            } else {
-                echo json_encode(['success' => false, 'error' => 'Erreur ou droits insuffisants.']);
-                exit;
+                echo json_encode(['success' => true]); exit;
             }
         }
-        http_response_code(400);
-        echo json_encode(['success' => false, 'error' => 'ID image manquant']);
-        exit;
+        echo json_encode(['success' => false]); exit;
     }
 }
 ?>
