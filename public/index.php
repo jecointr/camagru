@@ -54,6 +54,10 @@ switch ($path) {
         require CONTROLLERS . '/AuthController.php';
         (new AuthController())->resetPassword();
         break;
+    case '/profile':
+        require CONTROLLERS . '/AuthController.php';
+        (new AuthController())->profile();
+        break;
 
     // --- GALERIE ---
     case '/gallery':

@@ -85,5 +85,41 @@ class AuthController {
             }
         }
     }
+
+    public function profile() {
+        if (!isset($_SESSION['user_id'])) { header('Location: /login'); exit; }
+        
+        $userModel = new User();
+        $error = '';
+        $success = '';
+
+        // Traitement du formulaire
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $newUsername = htmlspecialchars($_POST['username']);
+            $newEmail = filter_var($_POST['email'], FILTER_VALIDATE_EMAIL);
+            $newPass = !empty($_POST['password']) ? $_POST['password'] : null;
+
+            if (!$newUsername || !$newEmail) {
+                $error = "Champs obligatoires manquants.";
+            } elseif ($newPass && (strlen($newPass) < 8 || !preg_match("/[A-Z]/", $newPass) || !preg_match("/[0-9]/", $newPass))) {
+                $error = "Le nouveau mot de passe ne respecte pas les critères de sécurité.";
+            } else {
+                $res = $userModel->update($_SESSION['user_id'], $newUsername, $newEmail, $newPass);
+                if ($res === "EXISTS") {
+                    $error = "Ce nom d'utilisateur ou cet email est déjà pris.";
+                } elseif ($res) {
+                    $success = "Profil mis à jour avec succès !";
+                    // Mise à jour de la session si le username a changé
+                    $_SESSION['username'] = $newUsername;
+                } else {
+                    $error = "Erreur lors de la mise à jour.";
+                }
+            }
+        }
+
+        // Récupération des infos actuelles pour l'affichage
+        $user = $userModel->getById($_SESSION['user_id']);
+        require __DIR__ . '/../views/auth/profile.php';
+    }
 }
 ?>

@@ -80,5 +80,34 @@ class User {
         }
         return false;
     }
+
+    // Mettre à jour les infos utilisateur
+    public function update($id, $username, $email, $password = null) {
+        // 1. On vérifie si username/email sont déjà pris par QUELQU'UN D'AUTRE
+        $sql = "SELECT id FROM users WHERE (username = ? OR email = ?) AND id != ?";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$username, $email, $id]);
+        if ($stmt->fetch()) return "EXISTS";
+
+        // 2. Construction de la requête dynamique
+        if ($password) {
+            $hash = password_hash($password, PASSWORD_BCRYPT);
+            $sql = "UPDATE users SET username = ?, email = ?, password = ? WHERE id = ?";
+            $params = [$username, $email, $hash, $id];
+        } else {
+            $sql = "UPDATE users SET username = ?, email = ? WHERE id = ?";
+            $params = [$username, $email, $id];
+        }
+
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute($params);
+    }
+
+    // Récupérer un user par ID (pour pré-remplir le formulaire)
+    public function getById($id) {
+        $stmt = $this->db->prepare("SELECT username, email, notification_active FROM users WHERE id = ?");
+        $stmt->execute([$id]);
+        return $stmt->fetch();
+    }
 }
 ?>
