@@ -10,7 +10,7 @@
                 <canvas id="canvas" style="display:none;"></canvas>
                 <img id="preview-upload" style="display:none; width: 100%; max-height: 480px; object-fit: contain;">
                 
-                <img id="filter-overlay" src="" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 200px; display: none; pointer-events: none;">
+                <img id="filter-overlay" src="" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: auto; max-width: 100%; max-height: 100%; display: none; pointer-events: none;">
             </div>
 
             <div class="controls" style="margin-top: 20px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
