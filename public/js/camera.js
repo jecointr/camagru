@@ -1,127 +1,155 @@
 (function() {
+    console.log("📷 Chargement du script Camera...");
+
     const video = document.getElementById('video');
     const canvas = document.getElementById('canvas');
-    const photoButton = document.getElementById('snap');
-    const uploadInput = document.getElementById('upload');
-    const filterOverlay = document.getElementById('filter-overlay');
-    const gallerySide = document.getElementById('gallery-side');
-    
+    const snapBtn = document.getElementById('snap');
+    const uploadInput = document.getElementById('upload-file');
+    const previewUpload = document.getElementById('preview-upload');
+    const thumbnails = document.getElementById('thumbnails');
+
+    // Vérification que les éléments existent
+    if (!video || !canvas || !snapBtn) {
+        console.error("❌ Erreur critique : Éléments HTML manquants (video, canvas ou bouton).");
+        return;
+    }
+
     let width = 640;
     let height = 480;
-    let streaming = false;
-
-    // 1. Démarrer la Webcam
+    
+    // 1. Démarrage Webcam
     navigator.mediaDevices.getUserMedia({ video: true, audio: false })
         .then(function(stream) {
+            console.log("✅ Webcam autorisée et active.");
             video.srcObject = stream;
             video.play();
         })
         .catch(function(err) {
-            console.log("Erreur Webcam : " + err);
-            // Si pas de webcam, on peut quand même utiliser l'upload
+            console.error("⚠️ Erreur Webcam (Peut être bloquée ou absente) : " + err);
+            // On ne bloque pas tout, l'upload reste possible
         });
 
     video.addEventListener('canplay', function(ev){
-        if (!streaming) {
-            // Ajustement ratio
-            height = video.videoHeight / (video.videoWidth/width);
+        console.log("🎥 Flux vidéo prêt.");
+        // Calcul du ratio seulement si la vidéo a une taille valide
+        if (video.videoWidth > 0) {
+            height = video.videoHeight / (video.videoWidth / width);
             video.setAttribute('width', width);
             video.setAttribute('height', height);
             canvas.setAttribute('width', width);
             canvas.setAttribute('height', height);
-            streaming = true;
         }
     }, false);
 
-    // 2. Gestion du filtre (Aperçu)
-    window.updateFilter = function(radio) {
-        photoButton.disabled = false;
-        photoButton.innerText = "📸 Prendre la photo";
-        // En vrai projet, met ici le chemin réel vers l'image du filtre
-        // filterOverlay.src = '/img/filters/' + radio.value;
-        // filterOverlay.style.display = 'block';
-    };
+    // 2. Fonction globale pour activer le bouton (appelée par le HTML onchange)
+    window.enableSnap = function() {
+        console.log("🔘 Filtre sélectionné -> Bouton activé.");
+        snapBtn.disabled = false;
+        snapBtn.classList.remove('disabled'); // Si tu as du CSS spécifique
+        snapBtn.style.cursor = "pointer";
+    }
 
-    // 3. Prise de photo
-    photoButton.addEventListener('click', function(ev) {
+    // 3. Clic sur le bouton Photo
+    snapBtn.addEventListener('click', function(ev){
         ev.preventDefault();
+        console.log("📸 Clic sur 'Prendre Photo'");
+        
+        if (snapBtn.disabled) {
+            console.log("⛔ Bouton désactivé, clic ignoré.");
+            return;
+        }
+        
         takePicture();
     });
 
-    // 4. Upload fichier alternatif
-    uploadInput.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const img = new Image();
-                img.onload = function() {
-                    // Dessiner l'image uploadée sur le canvas
-                    const context = canvas.getContext('2d');
-                    canvas.width = width;
-                    canvas.height = height;
-                    context.drawImage(img, 0, 0, width, height);
-                    sendImage(canvas.toDataURL('image/png'));
+    // 4. Gestion Upload
+    if (uploadInput) {
+        uploadInput.addEventListener('change', function(e){
+            console.log("📂 Fichier sélectionné.");
+            const file = e.target.files[0];
+            if (file) {
+                // Activer le bouton snap car on a une image
+                enableSnap();
+                
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    previewUpload.src = ev.target.result;
+                    previewUpload.style.display = 'block';
+                    if (video) video.style.display = 'none';
                 }
-                img.src = e.target.result;
+                reader.readAsDataURL(file);
             }
-            reader.readAsDataURL(file);
-        }
-    });
+        });
+    }
 
     function takePicture() {
         const context = canvas.getContext('2d');
-        if (width && height) {
-            canvas.width = width;
-            canvas.height = height;
-            // Dessiner la vidéo sur le canvas
-            context.drawImage(video, 0, 0, width, height);
-            
-            const data = canvas.toDataURL('image/png');
-            sendImage(data);
-        }
-    }
+        canvas.width = width;
+        canvas.height = height;
 
-    function sendImage(base64Data) {
-        const filter = document.querySelector('input[name="filter"]:checked');
-        if (!filter) {
-            alert("Veuillez sélectionner un filtre !");
+        // Logique : Si vidéo visible on la prend, sinon on prend l'upload
+        if (video && video.style.display !== 'none') {
+            console.log("👉 Capture depuis la Webcam");
+            context.drawImage(video, 0, 0, width, height);
+        } else if (previewUpload && previewUpload.src) {
+            console.log("👉 Capture depuis l'Upload");
+            context.drawImage(previewUpload, 0, 0, width, height);
+        } else {
+            console.error("❌ Ni webcam ni upload disponible.");
             return;
         }
 
-        const data = {
-            image: base64Data,
-            filter: filter.value
+        const data = canvas.toDataURL('image/png');
+        
+        // Vérification de la donnée
+        if (data.length < 100) {
+            console.error("❌ Erreur: Image vide générée.");
+            return;
+        }
+
+        sendImage(data);
+    }
+
+    function sendImage(base64) {
+        const filterInput = document.querySelector('input[name="filter"]:checked');
+        
+        if (!filterInput) {
+            alert("Veuillez sélectionner un filtre !");
+            return;
+        }
+        
+        console.log("🚀 Envoi au serveur avec filtre : " + filterInput.value);
+
+        const payload = {
+            image: base64,
+            filter: filterInput.value
         };
 
-        // Envoi AJAX
         fetch('/save-image', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
+            body: JSON.stringify(payload)
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                addImageToSide(data.filename);
-            } else {
-                alert('Erreur serveur : ' + data.error);
+        .then(res => res.text()) // On lit en text d'abord pour voir si c'est du HTML d'erreur
+        .then(text => {
+            try {
+                return JSON.parse(text);
+            } catch (e) {
+                console.error("❌ Réponse serveur invalide (Pas du JSON) : ", text);
+                throw new Error("Réponse serveur invalide");
             }
         })
-        .catch(err => console.error("Erreur Fetch:", err));
-    }
-
-    function addImageToSide(filename) {
-        const img = document.createElement('img');
-        img.src = '/uploads/' + filename;
-        img.style.width = '100%';
-        img.style.borderRadius = '4px';
-        img.style.marginBottom = '10px';
-        img.style.border = '1px solid #ddd';
-        
-        // On retire le texte "Aucune image" si présent
-        if (gallerySide.querySelector('p')) gallerySide.innerHTML = '';
-        
-        gallerySide.prepend(img);
+        .then(data => {
+            console.log("✅ Réponse serveur :", data);
+            if (data.success) {
+                const div = document.createElement('div');
+                div.className = 'thumb';
+                div.innerHTML = `<img src="/uploads/${data.filename}" style="width:100%; border-radius:4px; margin-bottom:10px;">`;
+                if (thumbnails) thumbnails.prepend(div);
+            } else {
+                alert("Erreur serveur : " + data.error);
+            }
+        })
+        .catch(err => console.error("❌ Erreur Fetch :", err));
     }
 })();
