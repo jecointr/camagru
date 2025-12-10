@@ -16,6 +16,9 @@
                 <li><a href="/gallery">Galerie</a></li>
                 
                 <?php if (isset($_SESSION['user_id'])): ?>
+                    <li style="margin-left: 15px; font-weight: bold; color: #ecf0f1;">
+                        Bonjour, <a href="/profile" style="color: #3498db;"><?= htmlspecialchars($_SESSION['username']) ?></a>
+                    </li>
                     <li><a href="/editor" class="btn">Créer</a></li>
                     <li><a href="/logout">Déconnexion</a></li>
                 <?php else: ?>
