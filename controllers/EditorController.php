@@ -60,8 +60,9 @@ class EditorController {
             $fltW = imagesx($filterImage);
             $fltH = imagesy($filterImage);
             
-            $dstX = ($srcW - $fltW) / 2;
-            $dstY = ($srcH - $fltH) / 2;
+            // On force la conversion en Entier (int) pour éviter l'erreur de précision sur les nombres impairs
+            $dstX = (int) (($srcW - $fltW) / 2);
+            $dstY = (int) (($srcH - $fltH) / 2);
 
             imagecopy($sourceImage, $filterImage, $dstX, $dstY, 0, 0, $fltW, $fltH);
             imagedestroy($filterImage);
