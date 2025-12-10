@@ -76,4 +76,34 @@ document.addEventListener('DOMContentLoaded', () => {
             .catch(err => console.error('Erreur Commentaire AJAX:', err));
         });
     });
+
+    // --- 3. Gestion de la Suppression ---
+    document.querySelectorAll('.delete-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault(); // Empêche le rechargement
+            
+            if (!confirm('Êtes-vous sûr de vouloir supprimer cette image ?')) {
+                return;
+            }
+
+            const imageId = this.querySelector('input[name="image_id"]').value;
+            const cardToRemove = this.closest('.gallery-card'); // La carte entière à supprimer
+
+            fetch('/delete-image', {
+                method: 'POST',
+                body: new URLSearchParams({ image_id: imageId }),
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    // Supprimer l'élément du DOM sans recharger
+                    cardToRemove.remove();
+                } else {
+                    alert('Erreur suppression : ' + (data.error || 'Erreur inconnue.'));
+                }
+            })
+            .catch(err => console.error('Erreur Suppression AJAX:', err));
+        });
+    });
 });

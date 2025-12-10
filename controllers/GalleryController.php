@@ -86,13 +86,28 @@ class GalleryController {
     }
 
     public function delete() {
-        if (!isset($_SESSION['user_id'])) { header('Location: /login'); exit; }
+        header('Content-Type: application/json');
+
+        if (!isset($_SESSION['user_id'])) {
+            http_response_code(401);
+            echo json_encode(['success' => false, 'error' => 'Non authentifié']);
+            exit;
+        }
 
         if (isset($_POST['image_id'])) {
             $model = new Gallery();
-            $model->deleteImage($_POST['image_id'], $_SESSION['user_id']);
+            
+            if ($model->deleteImage($_POST['image_id'], $_SESSION['user_id'])) {
+                echo json_encode(['success' => true]);
+                exit;
+            } else {
+                echo json_encode(['success' => false, 'error' => 'Erreur ou droits insuffisants.']);
+                exit;
+            }
         }
-        header('Location: /gallery');
+        http_response_code(400);
+        echo json_encode(['success' => false, 'error' => 'ID image manquant']);
+        exit;
     }
 }
 ?>

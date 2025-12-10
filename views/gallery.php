@@ -9,7 +9,7 @@
                 <div style="position: relative;">
                     <img src="/uploads/<?= htmlspecialchars($img['image_path']) ?>" alt="Montage">
                     <?php if (isset($_SESSION['user_id']) && $_SESSION['user_id'] == $img['user_id']): ?>
-                        <form action="/delete-image" method="POST" onsubmit="return confirm('Supprimer cette image ?');" style="position: absolute; top: 10px; right: 10px; background: none; padding: 0; box-shadow: none;">
+                        <form action="/delete-image" method="POST" class="delete-form" style="position: absolute; top: 10px; right: 10px; background: none; padding: 0; box-shadow: none;">
                             <input type="hidden" name="image_id" value="<?= $img['id'] ?>">
                             <button type="submit" style="background: red; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">🗑️</button>
                         </form>
