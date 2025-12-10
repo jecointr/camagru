@@ -18,7 +18,8 @@ class GalleryController {
             $img['likes'] = $galleryModel->getLikeCount($img['id']);
             $img['comments'] = $galleryModel->getComments($img['id']);
         }
-
+        unset($img); // Break reference
+        
         // --- GESTION AJAX ---
         if (isset($_GET['ajax']) && $_GET['ajax'] == 1) {
             header('Content-Type: application/json');
