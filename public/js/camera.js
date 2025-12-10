@@ -41,12 +41,22 @@
         }
     }, false);
 
-    // 2. Fonction globale pour activer le bouton (appelée par le HTML onchange)
     window.enableSnap = function() {
-        console.log("🔘 Filtre sélectionné -> Bouton activé.");
+        console.log("🔘 Filtre sélectionné.");
         snapBtn.disabled = false;
-        snapBtn.classList.remove('disabled'); // Si tu as du CSS spécifique
+        snapBtn.style.opacity = "1";
         snapBtn.style.cursor = "pointer";
+
+        const filterInput = document.querySelector('input[name="filter"]:checked');
+        const overlay = document.getElementById('filter-overlay');
+        
+        if (filterInput && overlay) {
+            // On cherche l'image qui est dans le label du bouton radio coché
+            // (L'image est la balise 'sibling' ou enfant du label)
+            // Plus simple : on reconstruit le chemin
+            overlay.src = '/img/filters/' + filterInput.value;
+            overlay.style.display = 'block';
+        }
     }
 
     // 3. Clic sur le bouton Photo
