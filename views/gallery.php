@@ -7,7 +7,7 @@
 <div class="container">
     <h1 style="text-align: center; margin-bottom: 30px;">Galerie Publique</h1>
 
-    <div class="gallery-grid">
+    <div class="gallery-grid" id="gallery-container">
         <?php foreach ($images as $img): ?>
             <div class="gallery-card">
                 <div style="position: relative;">
@@ -24,6 +24,20 @@
                 <div class="gallery-info">
                     <p style="color: #777; font-size: 0.9em;">Par <strong><?= htmlspecialchars($img['username']) ?></strong></p>
                     
+                    <?php
+                        // On prépare les URLs pour le partage
+                        $host = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]";
+                        $sharePageUrl = urlencode($host . "/gallery");
+                        $shareImageUrl = urlencode($host . "/uploads/" . $img['image_path']);
+                        $shareText = urlencode("Regardez mon montage sur Camagru !");
+                    ?>
+                    <div class="social-share" style="margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px; text-align: center; font-size: 0.9em;">
+                        <span style="color: #555; margin-right: 5px;">Partager :</span>
+                        <a href="https://www.facebook.com/sharer/sharer.php?u=<?= $sharePageUrl ?>" target="_blank" style="margin-right: 8px; text-decoration: none;">📘 FB</a>
+                        <a href="https://twitter.com/intent/tweet?url=<?= $sharePageUrl ?>&text=<?= $shareText ?>" target="_blank" style="margin-right: 8px; text-decoration: none;">🐦 X</a>
+                        <a href="https://pinterest.com/pin/create/button/?url=<?= $sharePageUrl ?>&media=<?= $shareImageUrl ?>&description=<?= $shareText ?>" target="_blank" style="text-decoration: none;">📌 Pin</a>
+                    </div>
+
                     <div class="gallery-actions" style="margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px;">
                         <span class="like-count" style="margin-right: 15px;">❤️ <?= $img['likes'] ?> J'aime</span>
                         <?php if (isset($_SESSION['user_id'])): ?>
