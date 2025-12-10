@@ -20,31 +20,21 @@
                     <p style="color: #777; font-size: 0.9em;">Par <strong><?= htmlspecialchars($img['username']) ?></strong> le <?= date('d/m/Y', strtotime($img['created_at'])) ?></p>
                     
                     <div class="gallery-actions" style="margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px;">
-                        <span>❤️ <?= $img['likes'] ?> J'aime</span>
+                        <span class="like-count" style="margin-right: 15px;">❤️ <?= $img['likes'] ?> J'aime</span>
                         <?php if (isset($_SESSION['user_id'])): ?>
-                            <form action="/like" method="POST" style="display:inline; padding: 0; background: none; box-shadow: none;">
+                            <form action="/like" method="POST" class="like-form" style="display:inline; padding: 0; background: none; box-shadow: none;">
                                 <input type="hidden" name="image_id" value="<?= $img['id'] ?>">
-                                <button type="submit" class="btn-like">👍</button>
+                                <button type="submit" class="btn-like" style="font-size: 1.2rem;">👍</button>
                             </form>
                         <?php endif; ?>
                     </div>
-
+                    
                     <div class="comments-section" style="margin-top: 15px;">
-                        <div style="max-height: 100px; overflow-y: auto; background: #f9f9f9; padding: 5px; border-radius: 4px; font-size: 0.85em;">
-                            <?php if (empty($img['comments'])): ?>
-                                <p style="color:#aaa;">Aucun commentaire.</p>
-                            <?php else: ?>
-                                <?php foreach ($img['comments'] as $cmt): ?>
-                                    <p style="margin-bottom: 5px;">
-                                        <strong><?= htmlspecialchars($cmt['username']) ?>:</strong> 
-                                        <?= htmlspecialchars($cmt['comment']) ?>
-                                    </p>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
-                        </div>
+                        <div class="comment-list" style="max-height: 100px; overflow-y: auto; background: #f9f9f9; padding: 5px; border-radius: 4px; font-size: 0.85em;">
+                            </div>
 
                         <?php if (isset($_SESSION['user_id'])): ?>
-                            <form action="/comment" method="POST" style="margin-top: 10px; display: flex; gap: 5px; padding: 0; background: none; box-shadow: none;">
+                            <form action="/comment" method="POST" class="comment-form" style="margin-top: 10px; display: flex; gap: 5px; padding: 0; background: none; box-shadow: none;">
                                 <input type="hidden" name="image_id" value="<?= $img['id'] ?>">
                                 <input type="text" name="comment" placeholder="Un commentaire..." required style="flex: 1; padding: 5px; border: 1px solid #ddd; border-radius: 4px;">
                                 <button type="submit" style="background: #2980b9; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">OK</button>
@@ -69,4 +59,5 @@
     </div>
 </div>
 
+<script src="/js/gallery.js"></script>
 <?php include __DIR__ . '/layout/footer.php'; ?>

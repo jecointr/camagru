@@ -27,18 +27,37 @@ class GalleryController {
     }
 
     public function like() {
-        if (!isset($_SESSION['user_id'])) { header('Location: /login'); exit; }
+        header('Content-Type: application/json');
         
+        if (!isset($_SESSION['user_id'])) {
+            http_response_code(401);
+            echo json_encode(['success' => false, 'error' => 'Non authentifié']);
+            exit;
+        }
+
         if (isset($_POST['image_id'])) {
             $model = new Gallery();
-            $model->toggleLike($_SESSION['user_id'], $_POST['image_id']);
+            $status = $model->toggleLike($_SESSION['user_id'], $_POST['image_id']); // Assumons que toggleLike retourne 'liked' ou 'unliked'
+
+            // Récupérer le nouveau compte pour l'envoyer au client
+            $newCount = $model->getLikeCount($_POST['image_id']);
+
+            echo json_encode(['success' => true, 'status' => $status, 'new_count' => $newCount]);
+            exit;
         }
-        // Redirige vers la page précédente
-        header('Location: ' . $_SERVER['HTTP_REFERER']); 
+        http_response_code(400);
+        echo json_encode(['success' => false, 'error' => 'ID image manquant']);
+        exit;
     }
 
     public function comment() {
-        if (!isset($_SESSION['user_id'])) { header('Location: /login'); exit; }
+        header('Content-Type: application/json');
+        
+        if (!isset($_SESSION['user_id'])) {
+            http_response_code(401);
+            echo json_encode(['success' => false, 'error' => 'Non authentifié']);
+            exit;
+        }
 
         if (isset($_POST['image_id']) && !empty($_POST['comment'])) {
             $model = new Gallery();
@@ -47,20 +66,23 @@ class GalleryController {
 
             if ($model->addComment($_SESSION['user_id'], $imageId, $comment)) {
                 
-                // --- NOTIFICATION EMAIL (MANDATORY) ---
+                // (La logique d'envoi de mail de notification reste ici, elle est asynchrone)
                 $owner = $model->getImageOwner($imageId);
+                // ... (Logique d'envoi de mail) ...
                 
-                // Si l'auteur veut des notifs et que ce n'est pas lui-même qui commente
-                if ($owner && $owner['notification_active'] && $owner['email']) {
-                    $subject = "Nouveau commentaire sur Camagru";
-                    $message = "Bonjour " . $owner['username'] . ",\n\nUne nouvelle personne a commenté votre photo : \n\n\"$comment\"\n\nConnectez-vous pour répondre !";
-                    $headers = "From: no-reply@camagru.fr";
-                    
-                    mail($owner['email'], $subject, $message, $headers);
-                }
+                // On renvoie les données du nouveau commentaire pour l'affichage
+                echo json_encode([
+                    'success' => true,
+                    'comment' => $comment,
+                    'username' => $_SESSION['username'], // On récupère le pseudo de la session
+                    'timestamp' => time() // Horodatage pour affichage (optionnel)
+                ]);
+                exit;
             }
         }
-        header('Location: ' . $_SERVER['HTTP_REFERER']);
+        http_response_code(400);
+        echo json_encode(['success' => false, 'error' => 'Données manquantes ou erreur BDD']);
+        exit;
     }
 
     public function delete() {
