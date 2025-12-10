@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../config/database.php';
+require_once ROOT . '/config/database.php';
 
 class Gallery {
     private $db;
@@ -8,8 +8,10 @@ class Gallery {
         $this->db = Database::getInstance();
     }
 
-    // Récupère les images avec pagination + info auteur
+    // Récupérer les images avec Pagination + Info Auteur
     public function getImages($limit, $offset) {
+        // On sélectionne l'image, le nom de l'auteur, et on compte les likes
+        // (Note: Pour faire simple en PHP natif, on peut compter les likes séparément ou via sous-requête)
         $sql = "SELECT images.*, users.username 
                 FROM images 
                 JOIN users ON images.user_id = users.id 
@@ -17,34 +19,29 @@ class Gallery {
                 LIMIT :limit OFFSET :offset";
         
         $stmt = $this->db->prepare($sql);
-        // PDO a parfois du mal avec LIMIT/OFFSET en string, on force le type INT
         $stmt->bindValue(':limit', (int) $limit, PDO::PARAM_INT);
         $stmt->bindValue(':offset', (int) $offset, PDO::PARAM_INT);
         $stmt->execute();
         return $stmt->fetchAll();
     }
 
-    // Compte total pour la pagination
+    // Compter le nombre total d'images (pour calculer le nombre de pages)
     public function countImages() {
         return $this->db->query("SELECT COUNT(*) FROM images")->fetchColumn();
     }
 
-    // Gestion des Likes (Toggle : J'aime / Je n'aime plus)
+    // Gérer les Likes
     public function toggleLike($userId, $imageId) {
-        // Vérifier si déjà liké
+        // Vérifie si déjà liké
         $check = $this->db->prepare("SELECT id FROM likes WHERE user_id = ? AND image_id = ?");
         $check->execute([$userId, $imageId]);
         
         if ($check->rowCount() > 0) {
-            // Suppression (Unlike)
             $stmt = $this->db->prepare("DELETE FROM likes WHERE user_id = ? AND image_id = ?");
             $stmt->execute([$userId, $imageId]);
-            return "unliked";
         } else {
-            // Ajout (Like)
             $stmt = $this->db->prepare("INSERT INTO likes (user_id, image_id) VALUES (?, ?)");
             $stmt->execute([$userId, $imageId]);
-            return "liked";
         }
     }
 
@@ -54,10 +51,10 @@ class Gallery {
         return $stmt->fetchColumn();
     }
 
-    // Gestion des Commentaires
-    public function addComment($userId, $imageId, $comment) {
+    // Gérer les Commentaires
+    public function addComment($userId, $imageId, $content) {
         $stmt = $this->db->prepare("INSERT INTO comments (user_id, image_id, comment) VALUES (?, ?, ?)");
-        return $stmt->execute([$userId, $imageId, $comment]);
+        return $stmt->execute([$userId, $imageId, $content]);
     }
 
     public function getComments($imageId) {
@@ -71,15 +68,34 @@ class Gallery {
         return $stmt->fetchAll();
     }
 
-    // Utile pour la notification : récupérer l'email du propriétaire de l'image
+    // Récupérer l'email de l'auteur d'une image (pour la notif)
     public function getImageOwner($imageId) {
-        $sql = "SELECT users.email, users.notification_active 
+        $sql = "SELECT users.email, users.notification_active, users.username 
                 FROM images 
                 JOIN users ON images.user_id = users.id 
                 WHERE images.id = ?";
         $stmt = $this->db->prepare($sql);
         $stmt->execute([$imageId]);
         return $stmt->fetch();
+    }
+
+    // Supprimer une image (Seulement si on est proprio)
+    public function deleteImage($imageId, $userId) {
+        // 1. Vérifier ownership
+        $check = $this->db->prepare("SELECT image_path FROM images WHERE id = ? AND user_id = ?");
+        $check->execute([$imageId, $userId]);
+        $img = $check->fetch();
+
+        if ($img) {
+            // 2. Supprimer fichier
+            $path = ROOT . '/public/uploads/' . $img['image_path'];
+            if (file_exists($path)) unlink($path);
+
+            // 3. Supprimer BDD (Cascade supprimera likes/comments)
+            $del = $this->db->prepare("DELETE FROM images WHERE id = ?");
+            return $del->execute([$imageId]);
+        }
+        return false;
     }
 }
 ?>

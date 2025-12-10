@@ -68,6 +68,10 @@ switch ($path) {
         require CONTROLLERS . '/GalleryController.php';
         (new GalleryController())->comment();
         break;
+    case '/delete-image':
+        require CONTROLLERS . '/GalleryController.php';
+        (new GalleryController())->delete();
+        break;
 
     // --- EDITOR ---
     case '/editor':
