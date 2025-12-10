@@ -5,10 +5,12 @@
         
         <div class="main-section" style="flex: 3; min-width: 320px;">
             
-            <div class="video-wrapper" style="position: relative; background: #000; border-radius: 8px; overflow: hidden; min-height: 480px; display: flex; align-items: center; justify-content: center;">
-                <video id="video" autoplay playsinline style="width: 100%; display: block; transform: scaleX(-1);"></video>
+            <div class="video-wrapper" style="position: relative; background: #000; border-radius: 8px; overflow: hidden; width: 100%;">
+                
+                <video id="video" autoplay playsinline muted style="width: 100%; height: auto; display: block; transform: scaleX(-1); pointer-events: none;"></video>
+                
                 <canvas id="canvas" style="display:none;"></canvas>
-                <img id="preview-upload" style="display:none; width: 100%; max-height: 480px; object-fit: contain;">
+                <img id="preview-upload" style="display:none; width: 100%; height: auto; object-fit: contain;">
                 
                 <img id="filter-overlay" src="" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: auto; max-width: 100%; max-height: 100%; display: none; pointer-events: none;">
             </div>
