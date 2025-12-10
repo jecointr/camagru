@@ -6,7 +6,7 @@
         <div class="main-section" style="flex: 3; min-width: 320px;">
             
             <div class="video-wrapper" style="position: relative; background: #000; border-radius: 8px; overflow: hidden; min-height: 480px; display: flex; align-items: center; justify-content: center;">
-                <video id="video" autoplay playsinline style="width: 100%; display: block;"></video>
+                <video id="video" autoplay playsinline style="width: 100%; display: block; transform: scaleX(-1);"></video>
                 <canvas id="canvas" style="display:none;"></canvas>
                 <img id="preview-upload" style="display:none; width: 100%; max-height: 480px; object-fit: contain;">
                 
