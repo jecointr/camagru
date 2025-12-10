@@ -46,6 +46,11 @@
         <?php endforeach; ?>
     </div>
 
+    <?php 
+    // Si la galerie est vide, ou si l'utilisateur essaie de naviguer au-delà
+    // On n'affiche pas la pagination s'il n'y a aucune image.
+    if ($totalImages > 0): 
+    ?>
     <div class="pagination" style="text-align: center; margin-top: 40px;">
         <?php if ($page > 1): ?>
             <a href="?page=<?= $page - 1 ?>" class="btn btn-outline">« Précédent</a>
@@ -57,6 +62,14 @@
             <a href="?page=<?= $page + 1 ?>" class="btn btn-outline">Suivant »</a>
         <?php endif; ?>
     </div>
+    <?php endif; ?>
+    
+    <?php if ($totalImages === 0): ?>
+        <p style="text-align: center; color: #7f8c8d; font-size: 1.2em; padding: 50px 0;">
+            Aucune photo n'a encore été publiée. Soyez le premier !
+        </p>
+    <?php endif; ?>
+
 </div>
 
 <script src="/js/gallery.js"></script>
