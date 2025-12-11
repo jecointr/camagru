@@ -132,7 +132,8 @@
 
         const payload = {
             image: base64,
-            filter: filterInput.value
+            filter: filterInput.value,
+            csrf_token: (typeof CSRF_TOKEN !== 'undefined') ? CSRF_TOKEN : ''
         };
 
         fetch('/save-image', {

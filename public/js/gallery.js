@@ -88,9 +88,13 @@ function attachGalleryListeners() {
             const likeCountElement = this.closest('.gallery-actions').querySelector('.like-count');
             const likeButton = this.querySelector('button');
 
+            // Dans la section fetch('/like', ...)
+            const params = new URLSearchParams({ image_id: imageId });
+            if (typeof CSRF_TOKEN !== 'undefined') params.append('csrf_token', CSRF_TOKEN);
+
             fetch('/like', {
                 method: 'POST',
-                body: new URLSearchParams({ image_id: imageId }), 
+                body: params,
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
             })
             .then(res => res.json())
@@ -117,9 +121,13 @@ function attachGalleryListeners() {
             
             if (!commentInput.value) return;
 
+            // Dans la section fetch('/comment', ...)
+            const params = new URLSearchParams({ image_id: imageId, comment: commentInput.value });
+            if (typeof CSRF_TOKEN !== 'undefined') params.append('csrf_token', CSRF_TOKEN); // 👈 AJOUT
+
             fetch('/comment', {
                 method: 'POST',
-                body: new URLSearchParams({ image_id: imageId, comment: commentInput.value }),
+                body: params,
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
             })
             .then(res => res.json())
@@ -149,9 +157,13 @@ function attachGalleryListeners() {
             const imageId = this.querySelector('input[name="image_id"]').value;
             const card = this.closest('.gallery-card');
 
+            // Dans la section fetch('/delete-image', ...)
+            const params = new URLSearchParams({ image_id: imageId });
+            if (typeof CSRF_TOKEN !== 'undefined') params.append('csrf_token', CSRF_TOKEN); // 👈 AJOUT
+
             fetch('/delete-image', {
                 method: 'POST',
-                body: new URLSearchParams({ image_id: imageId }),
+                body: params,
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
             })
             .then(res => res.json())
