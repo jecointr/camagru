@@ -1,76 +1,61 @@
 <?php
 class ImageProcessor {
     
-    // Fusionne une image (Base64) avec un filtre (chemin PNG)
-    public function mergeAndSave($base64_data, $filter_path, $user_id) {
+    // On ajoute un argument optionnel $meta pour les coordonnées
+    public function mergeAndSave($base64_data, $filter_path, $user_id, $meta = null) {
         
-        // --- 1. SÉCURITÉ & NETTOYAGE ---
-
-        // On sépare l'en-tête "data:image/png;base64," du contenu
+        // 1. Décodage et Sécurité
         $data = explode(',', $base64_data);
         $clean_base64 = base64_decode(end($data));
-        
         if (!$clean_base64) return false;
 
-        // VÉRIFICATION DE SÉCURITÉ : Est-ce vraiment une image ?
-        // getimagesizefromstring renvoie false si ce n'est pas une image valide
         $img_info = getimagesizefromstring($clean_base64);
-        if ($img_info === false) {
-            // Ce n'est pas une image (ou c'est un fichier corrompu/malveillant)
-            return false;
-        }
-
-        // Optionnel : Vérifier le type MIME pour être strict
-        $allowed_types = ['image/png', 'image/jpeg'];
-        if (!in_array($img_info['mime'], $allowed_types)) {
-            return false; 
-        }
-
-        // --- 2. CRÉATION DES RESSOURCES ---
-
-        $source = imagecreatefromstring($clean_base64); // Photo webcam
-        $filter = @imagecreatefrompng($filter_path);    // Sticker
+        if ($img_info === false) return false;
+        
+        // 2. Création
+        $source = imagecreatefromstring($clean_base64);
+        $filter = @imagecreatefrompng($filter_path);
         
         if (!$source || !$filter) return false;
 
-        // --- 3. CORRECTION TRANSPARENCE (FIX) ---
-        
-        // A. Sur la SOURCE (Webcam) : On active le blending pour qu'elle accepte
-        // la transparence du calque qu'on va poser dessus.
+        // 3. Transparence
         imagealphablending($source, true);
         imagesavealpha($source, true);
-
-        // B. Sur le FILTRE (Sticker) : On préserve son canal Alpha
         imagealphablending($filter, true);
         imagesavealpha($filter, true);
 
-        // --- 4. POSITIONNEMENT & FUSION ---
-
-        $filter_w = imagesx($filter);
-        $filter_h = imagesy($filter);
-        $source_w = imagesx($source);
-        $source_h = imagesy($source);
+        // --- 4. POSITIONNEMENT AVANCÉ (NOUVEAU) ---
         
-        // On place le filtre au centre
-        $dest_x = (int) (($source_w - $filter_w) / 2);
-        $dest_y = (int) (($source_h - $filter_h) / 2);
+        $srcW = imagesx($source);
+        $srcH = imagesy($source);
+        $origFilterW = imagesx($filter);
+        $origFilterH = imagesy($filter);
 
-        // Fusion
-        imagecopy($source, $filter, $dest_x, $dest_y, 0, 0, $filter_w, $filter_h);
+        if ($meta && isset($meta['x'], $meta['y'], $meta['w'], $meta['h'])) {
+            // Position définie par le Drag & Drop JS
+            $dstX = (int) $meta['x'];
+            $dstY = (int) $meta['y'];
+            $newFilterW = (int) $meta['w'];
+            $newFilterH = (int) $meta['h'];
 
-        // --- 5. SAUVEGARDE ---
-
-        $filename = 'img_' . $user_id . '_' . time() . '_' . bin2hex(random_bytes(4)) . '.png';
-        $uploadDir = __DIR__ . '/../public/uploads/';
-        $filepath = $uploadDir . $filename;
-        
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0777, true);
+            // On redimensionne le filtre et on le colle
+            // imagecopyresampled(dst, src, dstX, dstY, srcX, srcY, dstW, dstH, srcW, srcH)
+            imagecopyresampled($source, $filter, $dstX, $dstY, 0, 0, $newFilterW, $newFilterH, $origFilterW, $origFilterH);
+        } else {
+            // Fallback : Centrage par défaut
+            $dest_x = (int) (($srcW - $origFilterW) / 2);
+            $dest_y = (int) (($srcH - $origFilterH) / 2);
+            imagecopy($source, $filter, $dest_x, $dest_y, 0, 0, $origFilterW, $origFilterH);
         }
 
+        // 5. Sauvegarde
+        $filename = 'img_' . $user_id . '_' . time() . '_' . bin2hex(random_bytes(4)) . '.png';
+        $uploadDir = __DIR__ . '/../public/uploads/';
+        if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
+        
+        $filepath = $uploadDir . $filename;
         $saved = imagepng($source, $filepath);
         
-        // Libération de la mémoire
         imagedestroy($source);
         imagedestroy($filter);
 
