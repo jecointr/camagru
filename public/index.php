@@ -1,6 +1,11 @@
 <?php
 session_start();
 
+// On génère un token unique par session s'il n'existe pas encore
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
 // Définition des chemins absolus
 define('ROOT', dirname(__DIR__));
 define('CONTROLLERS', ROOT . '/controllers');

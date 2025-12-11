@@ -3,6 +3,15 @@ require_once ROOT . '/models/Gallery.php';
 
 class GalleryController {
 
+    // Helper CSRF pour les requêtes POST standard (URL encoded)
+    private function checkCsrf() {
+        if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'error' => 'Erreur CSRF']);
+            exit;
+        }
+    }
+
     public function index() {
         $galleryModel = new Gallery();
         
@@ -40,6 +49,8 @@ class GalleryController {
     }
 
     public function like() {
+        $this->checkCsrf();
+
         header('Content-Type: application/json');
         if (!isset($_SESSION['user_id'])) {
             http_response_code(401);
@@ -48,14 +59,21 @@ class GalleryController {
 
         if (isset($_POST['image_id'])) {
             $model = new Gallery();
-            $status = $model->toggleLike($_SESSION['user_id'], $_POST['image_id']);
-            $newCount = $model->getLikeCount($_POST['image_id']);
-            echo json_encode(['success' => true, 'status' => $status, 'new_count' => $newCount]); exit;
+            try {
+                $status = $model->toggleLike($_SESSION['user_id'], $_POST['image_id']);
+                $newCount = $model->getLikeCount($_POST['image_id']);
+                echo json_encode(['success' => true, 'status' => $status, 'new_count' => $newCount]); exit;
+            } catch (Exception $e) {
+                // Si doublon attrapé par SQL, on gère proprement
+                echo json_encode(['success' => false, 'error' => 'Action impossible']); exit;
+            }
         }
         echo json_encode(['success' => false]); exit;
     }
 
     public function comment() {
+        $this->checkCsrf();
+
         header('Content-Type: application/json');
         if (!isset($_SESSION['user_id'])) {
             http_response_code(401);
@@ -90,6 +108,8 @@ class GalleryController {
     }
 
     public function delete() {
+        $this->checkCsrf();
+        
         header('Content-Type: application/json');
         if (!isset($_SESSION['user_id'])) {
             http_response_code(401);

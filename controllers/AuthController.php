@@ -2,10 +2,20 @@
 require_once __DIR__ . '/../models/User.php';
 
 class AuthController {
+
+    // Méthode utilitaire pour vérifier le token
+    private function checkCsrf() {
+        if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+            // On arrête tout si le token est invalide
+            die("Erreur de sécurité (CSRF) : Session invalide ou tentative d'intrusion.");
+        }
+    }
     
     public function register() {
         $error = '';
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->checkCsrf();
+
             $username = htmlspecialchars($_POST['username']); 
             $email = filter_var($_POST['email'], FILTER_VALIDATE_EMAIL);
             $password = $_POST['password'];
@@ -49,6 +59,8 @@ class AuthController {
     public function login() {
         $error = '';
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->checkCsrf();
+
             $username = $_POST['username'];
             $password = $_POST['password'];
             
@@ -95,6 +107,8 @@ class AuthController {
 
         // Traitement du formulaire
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->checkCsrf();
+            
             $newUsername = htmlspecialchars($_POST['username']);
             $newEmail = filter_var($_POST['email'], FILTER_VALIDATE_EMAIL);
             $newPass = !empty($_POST['password']) ? $_POST['password'] : null;
