@@ -82,13 +82,13 @@ class Gallery {
     // Supprimer une image (Seulement si on est proprio)
     public function deleteImage($imageId, $userId) {
         // 1. Vérifier ownership
-        $check = $this->db->prepare("SELECT image_path FROM images WHERE id = ? AND user_id = ?");
+        $check = $this->db->prepare("SELECT filename FROM images WHERE id = ? AND user_id = ?");
         $check->execute([$imageId, $userId]);
         $img = $check->fetch();
 
         if ($img) {
             // 2. Supprimer fichier
-            $path = ROOT . '/public/uploads/' . $img['image_path'];
+            $path = ROOT . '/public/uploads/' . $img['filename'];
             if (file_exists($path)) unlink($path);
 
             // 3. Supprimer BDD (Cascade supprimera likes/comments)

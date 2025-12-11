@@ -23,13 +23,13 @@ function createGalleryCard(img) {
     // URLs pour le partage social
     const host = window.location.protocol + "//" + window.location.host;
     const sharePageUrl = encodeURIComponent(host + "/gallery");
-    const shareImageUrl = encodeURIComponent(host + "/uploads/" + img.image_path);
+    const shareImageUrl = encodeURIComponent(host + "/uploads/" + img.filename);
     const shareText = encodeURIComponent("Regardez mon montage sur Camagru !");
 
     return `
     <div class="gallery-card">
         <div style="position: relative;">
-            <img src="/uploads/${escapeHtml(img.image_path)}" alt="Montage">
+            <img src="/uploads/${escapeHtml(img.filename)}" alt="Montage">
             ${isOwner ? `
                 <form action="/delete-image" method="POST" class="delete-form" style="position: absolute; top: 10px; right: 10px; background: none; padding: 0; box-shadow: none;">
                     <input type="hidden" name="image_id" value="${img.id}">

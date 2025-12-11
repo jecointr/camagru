@@ -10,6 +10,9 @@ services:
     env_file:
       - .env
 
+    environment:
+      APP_ENV: development # development or production
+
   db:
     image: mariadb:11.8
     restart: always
@@ -20,7 +23,6 @@ services:
       MYSQL_PASSWORD: user_password
     volumes:
       - db_data:/var/lib/mysql
-      # 👇 C'EST ICI LA MAGIE : On injecte le SQL d'init
       - ./config/setup.sql:/docker-entrypoint-initdb.d/init.sql
 
   mailhog:

@@ -11,7 +11,7 @@
         <?php foreach ($images as $img): ?>
             <div class="gallery-card">
                 <div style="position: relative;">
-                    <img src="/uploads/<?= htmlspecialchars($img['image_path']) ?>" alt="Montage">
+                    <img src="/uploads/<?= htmlspecialchars($img['filename']) ?>" alt="Montage">
                     
                     <?php if (isset($_SESSION['user_id']) && $_SESSION['user_id'] == $img['user_id']): ?>
                         <form action="/delete-image" method="POST" class="delete-form" style="position: absolute; top: 10px; right: 10px; background: none; padding: 0; box-shadow: none;">
@@ -28,7 +28,7 @@
                     <?php
                         $host = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]";
                         $sharePageUrl = urlencode($host . "/gallery");
-                        $shareImageUrl = urlencode($host . "/uploads/" . $img['image_path']);
+                        $shareImageUrl = urlencode($host . "/uploads/" . $img['filename']);
                         $shareText = urlencode("Regardez mon montage sur Camagru !");
                     ?>
                     <div class="social-share" style="margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px; text-align: center; font-size: 0.9em;">

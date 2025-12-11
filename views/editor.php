@@ -58,7 +58,7 @@
                 <?php if (isset($images) && !empty($images)): ?>
                     <?php foreach($images as $img): ?>
                         <div class="thumb">
-                            <img src="/uploads/<?= htmlspecialchars($img['image_path']) ?>" style="width: 100%; border-radius: 4px; border: 1px solid #eee;">
+                            <img src="/uploads/<?= htmlspecialchars($img['filename']) ?>" style="width: 100%; border-radius: 4px; border: 1px solid #eee;">
                         </div>
                     <?php endforeach; ?>
                 <?php else: ?>

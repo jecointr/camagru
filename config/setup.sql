@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS images (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
-    image_path VARCHAR(255) NOT NULL,
+    filename VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS likes (
     image_id INT NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (image_id) REFERENCES images(id) ON DELETE CASCADE,
-    UNIQUE(user_id, image_id)  -- AJOUT: Empêche les doublons de likes
+    UNIQUE(user_id, image_id)
 );
 
 CREATE TABLE IF NOT EXISTS comments (

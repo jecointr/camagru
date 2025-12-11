@@ -45,7 +45,7 @@ class EditorController {
         if ($filename) {
             try {
                 $db = Database::getInstance();
-                $stmt = $db->prepare("INSERT INTO images (user_id, image_path) VALUES (?, ?)");
+                $stmt = $db->prepare("INSERT INTO images (user_id, filename) VALUES (?, ?)");
                 $stmt->execute([$_SESSION['user_id'], $filename]);
 
                 echo json_encode(['success' => true, 'filename' => $filename]);
