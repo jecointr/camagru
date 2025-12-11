@@ -1,9 +1,18 @@
-Options -MultiViews
+# public/.htaccess
+
+# Sécurité : Empêche de lister les fichiers d'un dossier (CRUCIAL pour /uploads)
+# Stabilité : Empêche Apache de deviner les extensions de fichiers
+Options -Indexes -MultiViews
+
 RewriteEngine On
 
-# Si le fichier ou dossier demandé n'existe pas physiquement...
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
+# 1. Si le fichier demandé existe physiquement (image, css, js), on le sert et on s'arrête là.
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]
 
-# ... alors on redirige vers index.php
+# 2. Si le dossier demandé existe physiquement, on le sert et on s'arrête là.
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# 3. Tout le reste est envoyé au Routeur (index.php)
 RewriteRule ^ index.php [QSA,L]
