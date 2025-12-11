@@ -22,7 +22,8 @@ CREATE TABLE IF NOT EXISTS likes (
     user_id INT NOT NULL,
     image_id INT NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (image_id) REFERENCES images(id) ON DELETE CASCADE
+    FOREIGN KEY (image_id) REFERENCES images(id) ON DELETE CASCADE,
+    UNIQUE(user_id, image_id)  -- AJOUT: Empêche les doublons de likes
 );
 
 CREATE TABLE IF NOT EXISTS comments (
