@@ -1,32 +1,68 @@
-/* RESET & BASE */
+/* =========================================
+   1. VARIABLES & THEME (Dark Mode Engine)
+   ========================================= */
+:root {
+    /* Thème Clair (Défaut) */
+    --bg-color: #f4f7f6;
+    --text-color: #333;
+    --card-bg: #fff;
+    --header-bg: #2c3e50;
+    --header-text: #ecf0f1;
+    --accent: #e74c3c;       /* Rouge Camagru */
+    --accent-hover: #c0392b;
+    --border: #ddd;
+    --shadow: rgba(0,0,0,0.1);
+    --input-bg: #fff;
+}
+
+[data-theme="dark"] {
+    /* Thème Sombre */
+    --bg-color: #1a1a1a;
+    --text-color: #e0e0e0;
+    --card-bg: #2d2d2d;
+    --header-bg: #000;
+    --header-text: #ddd;
+    --accent: #ff6b6b;       /* Rouge plus vif pour le noir */
+    --accent-hover: #ff5252;
+    --border: #444;
+    --shadow: rgba(0,0,0,0.5);
+    --input-bg: #333;
+}
+
+/* =========================================
+   2. RESET & BASE
+   ========================================= */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
     font-family: 'Segoe UI', 'Roboto', Helvetica, Arial, sans-serif;
-    background-color: #f4f7f6;
-    color: #333;
+    background-color: var(--bg-color);
+    color: var(--text-color);
     display: flex;
     flex-direction: column;
     min-height: 100vh;
     line-height: 1.6;
+    transition: background 0.3s, color 0.3s; /* Transition fluide pour le Dark Mode */
 }
 
 a { text-decoration: none; color: inherit; transition: color 0.2s; }
-a:hover { color: #e74c3c; }
+a:hover { color: var(--accent); }
 ul { list-style: none; }
 
-/* LAYOUT & HEADER */
+/* =========================================
+   3. HEADER & FOOTER
+   ========================================= */
 .main-header {
-    background: #2c3e50;
-    color: #ecf0f1;
+    background: var(--header-bg);
+    color: var(--header-text);
     padding: 1rem 2rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 5px var(--shadow);
 }
 
-.main-header .logo { font-size: 1.5rem; font-weight: bold; color: #e74c3c; }
+.main-header .logo { font-size: 1.5rem; font-weight: bold; color: var(--accent); }
 .main-header nav ul { display: flex; gap: 20px; align-items: center; }
 
 .container {
@@ -38,79 +74,95 @@ ul { list-style: none; }
 }
 
 .main-footer {
-    background: #34495e;
-    color: #bdc3c7;
+    background: var(--header-bg);
+    color: #7f8c8d; /* Ou var(--header-text) si tu veux plus de contraste */
     text-align: center;
     padding: 15px;
     font-size: 0.9rem;
     margin-top: auto;
 }
 
-/* BOUTONS (Mélange : Rouge pour actions Camagru, Bleu pour formulaires) */
+/* =========================================
+   4. BOUTONS
+   ========================================= */
 .btn {
     display: inline-block;
     padding: 10px 20px;
     border-radius: 4px;
-    background: #e74c3c; /* Rouge par défaut */
+    background: var(--accent);
     color: white;
     border: none;
     cursor: pointer;
     font-weight: bold;
     transition: background 0.3s, transform 0.1s;
 }
-.btn:hover { background: #c0392b; transform: translateY(-1px); }
+.btn:hover { background: var(--accent-hover); transform: translateY(-1px); }
 
-.btn-blue { background: #2980b9; } /* Bleu pour login/register */
+.btn-blue { background: #2980b9; }
 .btn-blue:hover { background: #3498db; }
 
-.btn-outline { background: transparent; border: 2px solid #e74c3c; color: #e74c3c; }
-.btn-outline:hover { background: #e74c3c; color: white; }
+.btn-outline { background: transparent; border: 2px solid var(--accent); color: var(--accent); }
+.btn-outline:hover { background: var(--accent); color: white; }
 
-/* AUTHENTIFICATION (Style "Carte" restauré) */
+/* =========================================
+   5. CARDS, FORMS & AUTHENTIFICATION
+   ========================================= */
+/* Style générique pour tous les conteneurs "carte" */
+.auth-wrapper, .feature-card, .gallery-card, .controls, .side-section {
+    background: var(--card-bg);
+    color: var(--text-color);
+    border-radius: 8px;
+    box-shadow: 0 2px 5px var(--shadow);
+}
+
+/* Spécificités Auth */
 .auth-wrapper {
     max-width: 450px;
     margin: 40px auto;
-    background: white;
     padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1); /* L'ombre que tu aimais */
+    box-shadow: 0 4px 15px var(--shadow);
 }
 
 .auth-wrapper h2 {
     text-align: center;
     margin-bottom: 1.5rem;
-    color: #2c3e50;
+    color: var(--text-color); /* Adapté Dark Mode */
     font-size: 1.8rem;
 }
 
 .form-group { margin-bottom: 20px; }
-.form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #555; }
+.form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-color); opacity: 0.8; }
+
 .form-group input {
     width: 100%;
     padding: 12px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--border);
     border-radius: 4px;
     font-size: 1rem;
     transition: border 0.3s;
+    background-color: var(--input-bg); /* Fond input qui change avec le thème */
+    color: var(--text-color);
 }
 .form-group input:focus { border-color: #2980b9; outline: none; }
 .form-group small { display: block; margin-top: 5px; color: #7f8c8d; font-size: 0.85rem; }
 
-/* Feedback Messages */
+/* Alerts (PHP Feedback) */
 .alert { padding: 15px; margin-bottom: 20px; border-radius: 4px; font-weight: 500; }
 .alert-error { background: #fadbd8; color: #c0392b; border: 1px solid #e6b0aa; }
 .alert-success { background: #d5f5e3; color: #27ae60; border: 1px solid #abebc6; }
 
-/* HERO & ACCUEIL (Restauré) */
+/* =========================================
+   6. HERO & ACCUEIL
+   ========================================= */
 .hero {
     text-align: center;
     padding: 80px 20px;
-    background: linear-gradient(135deg, #ffffff 0%, #f2f2f2 100%);
+    background: var(--card-bg); /* Remplace le gradient fixe par la couleur de carte */
     border-radius: 12px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    box-shadow: 0 5px 20px var(--shadow);
     margin-bottom: 50px;
 }
-.hero h1 { font-size: 3rem; margin-bottom: 20px; color: #2c3e50; }
+.hero h1 { font-size: 3rem; margin-bottom: 20px; color: var(--text-color); }
 .hero p { font-size: 1.25rem; color: #7f8c8d; margin-bottom: 30px; }
 
 .features {
@@ -120,26 +172,59 @@ ul { list-style: none; }
     text-align: center;
 }
 .feature-card {
-    background: white;
     padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     transition: transform 0.2s;
 }
 .feature-card:hover { transform: translateY(-5px); }
 .feature-card h3 { color: #2980b9; margin-bottom: 15px; }
 
-/* GALERIE */
+/* =========================================
+   7. GALERIE (Masonry Layout)
+   ========================================= */
 .gallery-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
+    /* On passe de Grid à Column pour l'effet Pinterest */
+    column-count: 3;
+    column-gap: 20px;
 }
-.gallery-card { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-.gallery-card img { width: 100%; height: 250px; object-fit: cover; display: block; }
 
-/* RESPONSIVE */
+.gallery-card {
+    display: inline-block; /* Important pour ne pas être coupé entre deux colonnes */
+    width: 100%;
+    margin-bottom: 20px;
+    overflow: hidden;
+    /* Background et border-radius gérés par le groupe générique .gallery-card plus haut */
+}
+.gallery-card img { width: 100%; height: auto; object-fit: cover; display: block; }
+
+/* =========================================
+   8. TOAST NOTIFICATIONS (JS)
+   ========================================= */
+.toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #333;
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    z-index: 1000;
+    animation: slideIn 0.3s ease-out;
+}
+.toast-success { background: #27ae60; }
+.toast-error { background: #c0392b; }
+
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+/* =========================================
+   9. RESPONSIVE
+   ========================================= */
+@media (max-width: 800px) { .gallery-grid { column-count: 2; } }
 @media (max-width: 768px) {
     .main-header { flex-direction: column; gap: 15px; }
     .hero h1 { font-size: 2rem; }
 }
+@media (max-width: 500px) { .gallery-grid { column-count: 1; } }
