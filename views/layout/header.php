@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Camagru</title>
     <link rel="stylesheet" href="/css/style.css">
+
+    <script>
+        const CSRF_TOKEN = "<?= $_SESSION['csrf_token'] ?? '' ?>";
+    </script>
 </head>
 <body>
     <header class="main-header">

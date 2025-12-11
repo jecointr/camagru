@@ -11,6 +11,8 @@
     <?php endif; ?>
 
     <form method="POST" action="/profile">
+        <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
+
         <div class="form-group">
             <label>Nom d'utilisateur</label>
             <input type="text" name="username" value="<?= htmlspecialchars($user['username']) ?>" required>

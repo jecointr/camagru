@@ -8,6 +8,8 @@
     <?php endif; ?>
 
     <form method="POST" action="/register">
+        <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
+
         <div class="form-group">
             <label for="username">Nom d'utilisateur</label>
             <input type="text" id="username" name="username" required placeholder="Ex: JeanDupont">
