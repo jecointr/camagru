@@ -15,8 +15,9 @@
 
         <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 25px;">
             <?php 
-                // Logique Image : Si user a une image, on prend dans /uploads/, sinon on prend l'image par défaut dans /img/
-                $avatarSrc = !empty($user['profile_pic']) 
+                // CORRECTION ICI :
+                // On vérifie si c'est une image custom ou l'image par défaut
+                $avatarSrc = (!empty($user['profile_pic']) && $user['profile_pic'] !== 'default_avatar.png')
                     ? '/uploads/' . $user['profile_pic'] 
                     : '/img/default_avatar.png'; 
             ?>
