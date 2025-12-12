@@ -1,190 +1,132 @@
-// Fonction utilitaire pour éviter les failles XSS lors de l'ajout dynamique de commentaire
-function escapeHtml(text) {
-    if (!text) return text;
-    return text
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-}
+console.log("Gallery Script Loaded v6.0 (ID ONLY Mode)");
 
-// Fonction principale qui attache les événements
 function attachGalleryListeners() {
-    
-    // 1. Likes
-    document.querySelectorAll('.like-form').forEach(form => {
-        if (form.getAttribute('data-listening')) return;
+    // Likes
+    document.querySelectorAll('.like-form:not([data-listening])').forEach(form => {
         form.setAttribute('data-listening', 'true');
-
         form.addEventListener('submit', function(e) {
             e.preventDefault();
-            const imageId = this.querySelector('input[name="image_id"]').value;
-            // RECUPERATION DU TOKEN DIRECTEMENT DEPUIS LE FORMULAIRE PHP
-            const csrfToken = this.querySelector('input[name="csrf_token"]').value;
-            
-            const likeCountElement = this.closest('.gallery-actions').querySelector('.like-count');
-            const likeButton = this.querySelector('button');
-
-            const params = new URLSearchParams({ 
-                image_id: imageId,
-                csrf_token: csrfToken // On envoie le token trouvé
-            });
-
-            fetch('/like', {
-                method: 'POST',
-                body: params,
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    likeCountElement.textContent = `❤️ ${data.new_count} J'aime`;
-                    likeButton.textContent = (data.status === 'liked') ? '👍' : '👎';
-                }
-            })
-            .catch(console.error);
+            const params = new URLSearchParams(new FormData(this));
+            fetch('/like', { method: 'POST', body: params })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        this.closest('.gallery-actions').querySelector('.like-count').textContent = `❤️ ${data.new_count}`;
+                    }
+                });
         });
     });
 
-    // 2. Commentaires
-    document.querySelectorAll('.comment-form').forEach(form => {
-        if (form.getAttribute('data-listening')) return;
+    // Comments
+    document.querySelectorAll('.comment-form:not([data-listening])').forEach(form => {
         form.setAttribute('data-listening', 'true');
-
         form.addEventListener('submit', function(e) {
             e.preventDefault();
-            const imageId = this.querySelector('input[name="image_id"]').value;
-            const csrfToken = this.querySelector('input[name="csrf_token"]').value;
-            const commentInput = this.querySelector('input[name="comment"]');
-            const commentsContainer = this.closest('.gallery-info').querySelector('.comment-list');
-            
-            if (!commentInput.value) return;
-
-            const params = new URLSearchParams({ 
-                image_id: imageId, 
-                comment: commentInput.value,
-                csrf_token: csrfToken 
-            });
-
-            fetch('/comment', {
-                method: 'POST',
-                body: params,
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    const newComment = document.createElement('p');
-                    newComment.style.marginBottom = "5px";
-                    // Ici on utilise escapeHtml car c'est du JS qui insère du texte utilisateur
-                    newComment.innerHTML = `<strong>${escapeHtml(data.username)}:</strong> ${escapeHtml(data.comment)}`;
-                    commentsContainer.appendChild(newComment);
-                    commentInput.value = '';
-                    commentsContainer.scrollTop = commentsContainer.scrollHeight;
-                }
-            })
-            .catch(console.error);
+            const input = this.querySelector('input[name="comment"]');
+            if(!input.value) return;
+            const params = new URLSearchParams(new FormData(this));
+            fetch('/comment', { method: 'POST', body: params })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        const list = this.closest('.gallery-info').querySelector('.comment-list');
+                        const p = document.createElement('p');
+                        p.innerHTML = `<strong>${data.username}:</strong> ${data.comment}`;
+                        list.appendChild(p);
+                        input.value = '';
+                    }
+                });
         });
     });
 
-    // 3. Suppression
-    document.querySelectorAll('.delete-form').forEach(form => {
-        if (form.getAttribute('data-listening')) return;
+    // Delete
+    document.querySelectorAll('.delete-form:not([data-listening])').forEach(form => {
         form.setAttribute('data-listening', 'true');
-
         form.addEventListener('submit', function(e) {
             e.preventDefault();
-            if (!confirm('Êtes-vous sûr de vouloir supprimer cette image ?')) return;
+            if (!confirm('Supprimer ?')) return;
 
-            const imageId = this.querySelector('input[name="image_id"]').value;
-            const csrfToken = this.querySelector('input[name="csrf_token"]').value;
             const card = this.closest('.gallery-card');
+            const params = new URLSearchParams(new FormData(this));
 
-            const params = new URLSearchParams({ 
-                image_id: imageId,
-                csrf_token: csrfToken
-            });
-
-            fetch('/delete-image', {
-                method: 'POST',
-                body: params,
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) card.remove();
-                else alert('Erreur suppression');
-            })
-            .catch(console.error);
+            fetch('/delete-image', { method: 'POST', body: params })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        card.remove();
+                        // On force le rechargement immédiat
+                        setTimeout(() => {
+                            if (window.loadNextPage) window.loadNextPage(true);
+                        }, 50);
+                    }
+                });
         });
     });
 }
 
-// Initialisation
 document.addEventListener('DOMContentLoaded', () => {
-    
-    // Attacher les listeners sur les images chargées par PHP (page 1)
     attachGalleryListeners();
 
-    // --- Gestion du Scroll Infini ---
     const galleryGrid = document.querySelector('.gallery-grid');
-    const loadingIndicator = document.getElementById('loading');
+    const loadingDiv = document.getElementById('loading');
+    
     let isLoading = false;
+    let hasMore = true;
 
-    function loadNextPage() {
-        const nextPageData = document.getElementById('next-page');
-        if (!nextPageData || isLoading) return; 
+    window.loadNextPage = function(force = false) {
+        if ((isLoading && !force) || !hasMore) return;
+
+        const cards = document.querySelectorAll('.gallery-card');
+        if (cards.length === 0) return;
+        
+        // On ne prend que l'ID !
+        const lastCard = cards[cards.length - 1];
+        const lastId = lastCard.getAttribute('data-id');
+
+        if (!lastId) return;
 
         isLoading = true;
-        loadingIndicator.style.display = 'block';
+        if(loadingDiv) loadingDiv.style.display = 'block';
 
-        const nextPage = nextPageData.dataset.page;
-        console.log(`Chargement de la page ${nextPage}...`);
-
-        fetch(`/gallery?page=${nextPage}&ajax=1`, {
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success && data.html) {
-                // MAGIE : On insère le HTML reçu directement !
-                galleryGrid.insertAdjacentHTML('beforeend', data.html);
-
-                // Réattacher les listeners sur les NOUVELLES images
-                attachGalleryListeners();
-
-                // Préparer la page suivante
-                if (data.next_page) {
-                    nextPageData.dataset.page = data.next_page;
-                } else {
-                    nextPageData.remove();
-                    if (!document.getElementById('end-message')) {
-                        const endMsg = document.createElement('div');
-                        endMsg.id = 'end-message';
-                        endMsg.style.textAlign = 'center';
-                        endMsg.style.marginTop = '30px';
-                        endMsg.style.color = '#7f8c8d';
-                        endMsg.innerText = 'Fin de la galerie.';
-                        document.querySelector('.container').appendChild(endMsg);
-                    }
+        // URL Simplifiée
+        const url = `/gallery?ajax=1&last_id=${lastId}`;
+        
+        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(res => res.text())
+            .then(text => {
+                try {
+                    return JSON.parse(text);
+                } catch (e) {
+                    console.error("Erreur JSON:", text);
+                    return { success: false };
                 }
-            } else {
-                nextPageData.remove();
-            }
-        })
-        .catch(err => console.error("Erreur Scroll:", err))
-        .finally(() => {
-            isLoading = false;
-            loadingIndicator.style.display = 'none';
-        });
-    }
+            })
+            .then(data => {
+                if (data.success && data.html) {
+                    if (data.html.trim() === "") {
+                        hasMore = false;
+                    } else {
+                        galleryGrid.insertAdjacentHTML('beforeend', data.html);
+                        attachGalleryListeners();
+                        hasMore = data.has_more;
+                    }
+                } else {
+                    hasMore = false;
+                }
+            })
+            .finally(() => {
+                isLoading = false;
+                if(loadingDiv) loadingDiv.style.display = 'none';
+                
+                // Si on a supprimé et qu'il reste de la place, on charge encore
+                if (hasMore && (force || document.body.offsetHeight < window.innerHeight)) {
+                    loadNextPage();
+                }
+            });
+    };
 
-    // Scroll event
     window.addEventListener('scroll', () => {
-        const scrollPosition = window.scrollY + window.innerHeight;
-        const totalHeight = document.documentElement.scrollHeight;
-        if (scrollPosition >= totalHeight - 300) {
+        if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 100) {
             loadNextPage();
         }
     });

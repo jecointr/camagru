@@ -179,22 +179,30 @@ ul { list-style: none; }
 .feature-card h3 { color: #2980b9; margin-bottom: 15px; }
 
 /* =========================================
-   7. GALERIE (Masonry Layout)
+   7. GALERIE (Mode GRID Standard)
    ========================================= */
 .gallery-grid {
-    /* On passe de Grid à Column pour l'effet Pinterest */
-    column-count: 3;
-    column-gap: 20px;
+    display: grid;
+    /* C'est ICI que la magie opère pour le Responsive automatique */
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    width: 100%;
+    padding-bottom: 50px; /* Un peu d'espace en bas pour le scroll */
 }
 
 .gallery-card {
-    display: inline-block; /* Important pour ne pas être coupé entre deux colonnes */
-    width: 100%;
-    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
     overflow: hidden;
-    /* Background et border-radius gérés par le groupe générique .gallery-card plus haut */
+    /* Les couleurs et ombres sont déjà gérées par le bloc ".feature-card, .gallery-card..." plus haut */
 }
-.gallery-card img { width: 100%; height: auto; object-fit: cover; display: block; }
+
+.gallery-card img {
+    width: 100%;
+    aspect-ratio: 4/3; /* Force un format rectangulaire propre */
+    object-fit: cover;
+    display: block;
+}
 
 /* =========================================
    8. TOAST NOTIFICATIONS (JS)
@@ -222,9 +230,9 @@ ul { list-style: none; }
 /* =========================================
    9. RESPONSIVE
    ========================================= */
-@media (max-width: 800px) { .gallery-grid { column-count: 2; } }
+/* Note: On a retiré les règles ".gallery-grid { column-count... }" car Grid gère ça tout seul maintenant ! */
+
 @media (max-width: 768px) {
     .main-header { flex-direction: column; gap: 15px; }
     .hero h1 { font-size: 2rem; }
 }
-@media (max-width: 500px) { .gallery-grid { column-count: 1; } }
