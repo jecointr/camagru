@@ -29,13 +29,25 @@ class GalleryController {
         }
         unset($img); // Break reference
         
-        // --- GESTION AJAX ---
+        // --- GESTION AJAX (MODIFIÉE) ---
         if (isset($_GET['ajax']) && $_GET['ajax'] == 1) {
+            
+            // 1. On démarre le buffer
+            ob_start();
+
+            // 2. On génère le HTML pour chaque image trouvée
+            foreach ($images as $img) {
+                // On inclut le MEME fichier partiel que la vue principale
+                include VIEWS . '/partials/image_card.php';
+            }
+
+            // 3. On récupère le contenu du buffer
+            $htmlContent = ob_get_clean();
+
             header('Content-Type: application/json');
             echo json_encode([
                 'success' => true,
-                'images' => $images,
-                // S'il y a autant d'images que la limite, on suppose qu'il y a une page suivante
+                'html' => $htmlContent, // On envoie le HTML tout prêt !
                 'next_page' => (count($images) === $limit) ? $page + 1 : null
             ]);
             exit;
