@@ -6,6 +6,9 @@ CREATE TABLE IF NOT EXISTS users (
     token VARCHAR(100),
     is_verified TINYINT(1) DEFAULT 0,
     notification_active TINYINT(1) DEFAULT 1,
+    reset_token VARCHAR(100) DEFAULT NULL,
+    reset_expires DATETIME DEFAULT NULL,
+    profile_pic VARCHAR(255) DEFAULT 'default_avatar.png',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

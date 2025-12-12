@@ -16,7 +16,7 @@ require_once ROOT . '/config/database.php';
 
 // Nettoyage de l'URL pour le routing
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-// Si l'app est dans un sous-dossier, on le retire (optionnel mais prudent)
+// Si l'app est dans un sous-dossier, on le retire
 $scriptDir = dirname($_SERVER['SCRIPT_NAME']);
 $path = str_replace($scriptDir, '', $uri);
 $path = '/' . ltrim($path, '/'); // Assure qu'on commence par /
@@ -51,14 +51,17 @@ switch ($path) {
         require CONTROLLERS . '/AuthController.php';
         (new AuthController())->verify();
         break;
+        
+    // CORRECTION ICI : Noms des méthodes et route
     case '/forgot-password':
         require CONTROLLERS . '/AuthController.php';
-        (new AuthController())->forgotPassword();
+        (new AuthController())->forgot(); // Méthode renamed
         break;
-    case '/reset-password':
+    case '/reset': // Route renamed pour correspondre au lien du mail
         require CONTROLLERS . '/AuthController.php';
-        (new AuthController())->resetPassword();
+        (new AuthController())->reset(); // Méthode renamed
         break;
+        
     case '/profile':
         require CONTROLLERS . '/AuthController.php';
         (new AuthController())->profile();
@@ -95,9 +98,11 @@ switch ($path) {
     // --- 404 ---
     default:
         http_response_code(404);
-        // On essaie d'afficher le header si possible, sinon juste du texte
         if (file_exists(VIEWS . '/layout/header.php')) include VIEWS . '/layout/header.php';
-        echo "<div class='container'><h1>404 - Page introuvable</h1></div>";
+        echo "<div class='container' style='text-align:center; padding:50px;'>";
+        echo "<h1>404</h1><p>Oups ! Cette page n'existe pas.</p>";
+        echo "<a href='/' class='btn'>Retour à l'accueil</a>";
+        echo "</div>";
         if (file_exists(VIEWS . '/layout/footer.php')) include VIEWS . '/layout/footer.php';
         break;
 }

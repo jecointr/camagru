@@ -11,6 +11,10 @@
         <div class="alert alert-success">Compte vérifié ! Vous pouvez vous connecter.</div>
     <?php endif; ?>
 
+    <?php if (isset($_GET['msg']) && $_GET['msg'] == 'password_reset'): ?>
+        <div class="alert alert-success">Mot de passe modifié avec succès ! Connectez-vous.</div>
+    <?php endif; ?>
+
     <?php if (isset($error) && $error): ?>
         <div class="alert alert-error"><?= $error ?></div>
     <?php endif; ?>
