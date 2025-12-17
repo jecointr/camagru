@@ -1,5 +1,5 @@
 (function() {
-    console.log("📷 Camagru Studio v3.0 (Pro) Loaded");
+    console.log("📷 Camagru Studio v3.1 (Pro) Loaded");
 
     // Récupération des éléments du DOM
     const video = document.getElementById('video');
@@ -20,35 +20,128 @@
     let isDragging = false;
     let startX, startY, initialLeft, initialTop;
     
-    // --- 1. GESTION DU DRAG & DROP (SOURIS) ---
+    // --- 1. GESTION DU DRAG & DROP (SOURIS + TACTILE) ---
     if (overlay) {
-        overlay.style.cursor = "move"; // Curseur de déplacement
+        overlay.style.cursor = "move";
         
-        // Quand on clique sur le filtre
-        overlay.addEventListener('mousedown', (e) => {
-            e.preventDefault(); 
+        // Variables locales pour les dimensions
+        let containerWidth, containerHeight;
+        let stickerWidth, stickerHeight;
+
+        // CONFIGURATION DES LIMITES (Optimisation Performance)
+        // scaleX/Y : 1.0 = Strict (le bord de l'image touche le bord de l'écran)
+        // scaleX/Y : 0.1 = Très tolérant (l'objet peut presque sortir entièrement)
+        const stickerConfigs = {
+            // Lunettes : Très plates. On veut pouvoir les monter/descendre librement (0.10)
+            // mais on garde les côtés assez stricts (0.70)
+            'glasses.png': { scaleX: 0.70, scaleY: 0.10 }, 
+
+            // Chapeau : On veut qu'il puisse dépasser en haut (0.10)
+            'hat.png':     { scaleX: 0.60, scaleY: 0.10 }, 
+
+            // Cadre : Lui doit rester bloqué strictement car il fait tout le tour
+            'frame.png':   { scaleX: 1.00, scaleY: 1.00 },
+
+            // Défaut : Tolérance moyenne
+            'default':     { scaleX: 0.80, scaleY: 0.50 }
+        };
+
+        // --- Fonctions Logiques Communes ---
+
+        const dragStart = (clientX, clientY) => {
             isDragging = true;
-            startX = e.clientX;
-            startY = e.clientY;
+            
+            // On met à jour les dimensions au début du click/touch
+            const container = overlay.parentElement;
+            containerWidth = container.offsetWidth;
+            containerHeight = container.offsetHeight;
+            stickerWidth = overlay.offsetWidth;
+            stickerHeight = overlay.offsetHeight;
+
+            startX = clientX;
+            startY = clientY;
             initialLeft = overlay.offsetLeft;
             initialTop = overlay.offsetTop;
-            overlay.style.cursor = "grabbing"; // Curseur "main fermée"
-        });
+            overlay.style.cursor = "grabbing";
+        };
 
-        // Quand on bouge la souris
-        document.addEventListener('mousemove', (e) => {
+        const dragMove = (clientX, clientY) => {
             if (!isDragging) return;
-            const dx = e.clientX - startX;
-            const dy = e.clientY - startY;
-            overlay.style.left = `${initialLeft + dx}px`;
-            overlay.style.top = `${initialTop + dy}px`;
-        });
 
-        // Quand on relâche la souris
-        document.addEventListener('mouseup', () => {
+            const dx = clientX - startX;
+            const dy = clientY - startY;
+
+            // 1. Position théorique (Centre du sticker)
+            let newLeft = initialLeft + dx;
+            let newTop = initialTop + dy;
+
+            // 2. Récupération de la config spécifique au sticker actif
+            const currentFilterInput = document.querySelector('input[name="filter"]:checked');
+            const filename = currentFilterInput ? currentFilterInput.value : 'default';
+            const conf = stickerConfigs[filename] || stickerConfigs['default'];
+
+            // 3. Calcul de la Hitbox effective (Zone de collision)
+            const realHalfWidth = stickerWidth / 2;
+            const realHalfHeight = stickerHeight / 2;
+
+            const effectiveHalfW = realHalfWidth * conf.scaleX;
+            const effectiveHalfH = realHalfHeight * conf.scaleY;
+
+            // 4. Définition des murs de la "Prison"
+            const minX = effectiveHalfW;
+            const maxX = containerWidth - effectiveHalfW;
+            
+            const minY = effectiveHalfH;
+            const maxY = containerHeight - effectiveHalfH;
+
+            // 5. Application des bornes (Clamping)
+            newLeft = Math.max(minX, Math.min(newLeft, maxX));
+            newTop = Math.max(minY, Math.min(newTop, maxY));
+
+            overlay.style.left = `${newLeft}px`;
+            overlay.style.top = `${newTop}px`;
+        };
+
+        const dragEnd = () => {
             isDragging = false;
             overlay.style.cursor = "move";
+        };
+
+        // --- Écouteurs d'événements SOURIS (PC) ---
+        
+        overlay.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            dragStart(e.clientX, e.clientY);
         });
+
+        document.addEventListener('mousemove', (e) => {
+            dragMove(e.clientX, e.clientY);
+        });
+
+        document.addEventListener('mouseup', dragEnd);
+
+
+        // --- Écouteurs d'événements TACTILES (Mobile) ---
+
+        overlay.addEventListener('touchstart', (e) => {
+            // e.preventDefault() est CRUCIAL ici pour empêcher 
+            // le scroll de la page quand on touche le sticker
+            if(e.cancelable) e.preventDefault(); 
+            
+            const touch = e.touches[0];
+            dragStart(touch.clientX, touch.clientY);
+        }, { passive: false }); // 'passive: false' permet d'utiliser preventDefault
+
+        document.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            // On empêche le scroll pendant qu'on déplace le sticker
+            if(e.cancelable) e.preventDefault();
+            
+            const touch = e.touches[0];
+            dragMove(touch.clientX, touch.clientY);
+        }, { passive: false });
+
+        document.addEventListener('touchend', dragEnd);
     }
 
     // --- 2. INITIALISATION WEBCAM ---

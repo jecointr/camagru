@@ -236,3 +236,8 @@ ul { list-style: none; }
     .main-header { flex-direction: column; gap: 15px; }
     .hero h1 { font-size: 2rem; }
 }
+
+.video-wrapper {
+    /* Empêche les comportements tactiles par défaut du navigateur sur cette zone */
+    touch-action: none; 
+}
