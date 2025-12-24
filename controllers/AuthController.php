@@ -12,6 +12,10 @@ class AuthController {
     }
     
     public function register() {
+        if (isset($_SESSION['user_id'])) {
+            header('Location: /');
+            exit;
+        }
         $error = '';
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $this->checkCsrf();
@@ -57,6 +61,10 @@ class AuthController {
     }
 
     public function login() {
+        if (isset($_SESSION['user_id'])) {
+            header('Location: /');
+            exit;
+        }
         $error = '';
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $this->checkCsrf();
