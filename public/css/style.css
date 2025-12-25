@@ -2,31 +2,50 @@
    1. VARIABLES & THEME (Dark Mode Engine)
    ========================================= */
 :root {
-    /* Thème Clair (Défaut) */
-    --bg-color: #f4f7f6;
-    --text-color: #333;
-    --card-bg: #fff;
-    --header-bg: #2c3e50;
-    --header-text: #ecf0f1;
-    --accent: #e74c3c;       /* Rouge Camagru */
-    --accent-hover: #c0392b;
-    --border: #ddd;
-    --shadow: rgba(0,0,0,0.1);
-    --input-bg: #fff;
+    /* Thème Clair (Modernisé) */
+    --bg-color: #f0f2f5;           /* Gris très léger, moins clinique que le blanc */
+    --text-color: #1c1e21;         /* Noir adouci */
+    --text-muted: #65676b;
+    --card-bg: #ffffff;
+    
+    /* Header avec effet verre */
+    --header-bg: rgba(255, 255, 255, 0.85);
+    --header-text: #050505;
+    
+    /* Accent Camagru (Rouge-Rosé moderne) */
+    --accent: #ff4757;
+    --accent-hover: #e84118;
+    
+    --border: #ced0d4;
+    --input-bg: #f0f2f5;
+    --focus-ring: rgba(255, 71, 87, 0.25);
+    
+    /* Ombres douces (Soft Shadows) */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
 [data-theme="dark"] {
-    /* Thème Sombre */
-    --bg-color: #1a1a1a;
-    --text-color: #e0e0e0;
-    --card-bg: #2d2d2d;
-    --header-bg: #000;
-    --header-text: #ddd;
-    --accent: #ff6b6b;       /* Rouge plus vif pour le noir */
+    /* Thème Sombre (Deep Blue/Grey) */
+    --bg-color: #18191a;
+    --text-color: #e4e6eb;
+    --text-muted: #b0b3b8;
+    --card-bg: #242526;
+    
+    --header-bg: rgba(36, 37, 38, 0.85);
+    --header-text: #e4e6eb;
+    
+    --accent: #ff6b6b;
     --accent-hover: #ff5252;
-    --border: #444;
-    --shadow: rgba(0,0,0,0.5);
-    --input-bg: #333;
+    
+    --border: #3e4042;
+    --input-bg: #3a3b3c;
+    --focus-ring: rgba(255, 107, 107, 0.25);
+    
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
 }
 
 /* =========================================
@@ -35,17 +54,18 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-    font-family: 'Segoe UI', 'Roboto', Helvetica, Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     background-color: var(--bg-color);
     color: var(--text-color);
     display: flex;
     flex-direction: column;
     min-height: 100vh;
     line-height: 1.6;
-    transition: background 0.3s, color 0.3s; /* Transition fluide pour le Dark Mode */
+    -webkit-font-smoothing: antialiased; /* Rendu de texte plus net */
+    transition: background 0.3s ease, color 0.3s ease;
 }
 
-a { text-decoration: none; color: inherit; transition: color 0.2s; }
+a { text-decoration: none; color: inherit; transition: all 0.2s ease; }
 a:hover { color: var(--accent); }
 ul { list-style: none; }
 
@@ -55,15 +75,29 @@ ul { list-style: none; }
 .main-header {
     background: var(--header-bg);
     color: var(--header-text);
-    padding: 1rem 2rem;
+    padding: 0.8rem 2rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 2px 5px var(--shadow);
+    position: sticky; /* Reste en haut */
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(10px); /* Effet de flou "Glassmorphism" */
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
 }
 
-.main-header .logo { font-size: 1.5rem; font-weight: bold; color: var(--accent); }
-.main-header nav ul { display: flex; gap: 20px; align-items: center; }
+.main-header .logo { 
+    font-size: 1.8rem; 
+    font-weight: 800; 
+    letter-spacing: -1px;
+    background: linear-gradient(45deg, var(--accent), #ff9f43);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent; /* Logo en dégradé */
+}
+
+.main-header nav ul { display: flex; gap: 24px; align-items: center; font-weight: 500; }
 
 .container {
     flex: 1;
@@ -71,173 +105,267 @@ ul { list-style: none; }
     max-width: 1200px;
     margin: 0 auto;
     padding: 40px 20px;
+    animation: fadeIn 0.5s ease-out;
 }
 
 .main-footer {
-    background: var(--header-bg);
-    color: #7f8c8d; /* Ou var(--header-text) si tu veux plus de contraste */
+    background: var(--card-bg);
+    color: var(--text-muted);
     text-align: center;
-    padding: 15px;
+    padding: 20px;
     font-size: 0.9rem;
     margin-top: auto;
+    border-top: 1px solid var(--border);
 }
 
 /* =========================================
    4. BOUTONS
    ========================================= */
 .btn {
-    display: inline-block;
-    padding: 10px 20px;
-    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 24px;
+    border-radius: 50px; /* Boutons pillule plus modernes */
     background: var(--accent);
     color: white;
     border: none;
     cursor: pointer;
-    font-weight: bold;
-    transition: background 0.3s, transform 0.1s;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1); /* Ombre légère */
 }
-.btn:hover { background: var(--accent-hover); transform: translateY(-1px); }
 
-.btn-blue { background: #2980b9; }
-.btn-blue:hover { background: #3498db; }
+.btn:hover { 
+    background: var(--accent-hover); 
+    transform: translateY(-2px); 
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
 
-.btn-outline { background: transparent; border: 2px solid var(--accent); color: var(--accent); }
-.btn-outline:hover { background: var(--accent); color: white; }
+.btn:active { transform: translateY(0); }
+
+.btn-blue { background: #0984e3; }
+.btn-blue:hover { background: #74b9ff; }
+
+.btn-outline { 
+    background: transparent; 
+    border: 2px solid var(--accent); 
+    color: var(--accent); 
+    box-shadow: none;
+}
+.btn-outline:hover { background: var(--accent); color: white; transform: translateY(-2px); }
 
 /* =========================================
    5. CARDS, FORMS & AUTHENTIFICATION
    ========================================= */
-/* Style générique pour tous les conteneurs "carte" */
+/* Style unifié des cartes */
 .auth-wrapper, .feature-card, .gallery-card, .controls, .side-section {
     background: var(--card-bg);
     color: var(--text-color);
-    border-radius: 8px;
-    box-shadow: 0 2px 5px var(--shadow);
+    border-radius: 16px; /* Coins plus arrondis */
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border);
+    overflow: hidden;
 }
 
-/* Spécificités Auth */
+/* Auth */
 .auth-wrapper {
-    max-width: 450px;
-    margin: 40px auto;
-    padding: 2rem;
-    box-shadow: 0 4px 15px var(--shadow);
+    max-width: 420px;
+    margin: 60px auto;
+    padding: 2.5rem;
 }
 
 .auth-wrapper h2 {
     text-align: center;
-    margin-bottom: 1.5rem;
-    color: var(--text-color); /* Adapté Dark Mode */
-    font-size: 1.8rem;
+    margin-bottom: 2rem;
+    color: var(--text-color);
+    font-size: 2rem;
+    font-weight: 700;
 }
 
-.form-group { margin-bottom: 20px; }
-.form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-color); opacity: 0.8; }
+.form-group { margin-bottom: 24px; }
+.form-group label { 
+    display: block; 
+    margin-bottom: 8px; 
+    font-weight: 600; 
+    color: var(--text-muted); 
+    font-size: 0.9rem;
+}
 
 .form-group input {
     width: 100%;
-    padding: 12px;
-    border: 1px solid var(--border);
-    border-radius: 4px;
+    padding: 14px 16px;
+    border: 2px solid transparent; /* Bordure transparente pour l'état par défaut */
+    border-radius: 12px;
     font-size: 1rem;
-    transition: border 0.3s;
-    background-color: var(--input-bg); /* Fond input qui change avec le thème */
+    transition: all 0.2s;
+    background-color: var(--input-bg);
     color: var(--text-color);
 }
-.form-group input:focus { border-color: #2980b9; outline: none; }
-.form-group small { display: block; margin-top: 5px; color: #7f8c8d; font-size: 0.85rem; }
 
-/* Alerts (PHP Feedback) */
-.alert { padding: 15px; margin-bottom: 20px; border-radius: 4px; font-weight: 500; }
-.alert-error { background: #fadbd8; color: #c0392b; border: 1px solid #e6b0aa; }
-.alert-success { background: #d5f5e3; color: #27ae60; border: 1px solid #abebc6; }
+.form-group input:focus { 
+    background-color: var(--card-bg);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px var(--focus-ring);
+    outline: none; 
+}
+
+.form-group small { display: block; margin-top: 8px; color: var(--text-muted); }
+
+/* Alerts */
+.alert { padding: 16px; margin-bottom: 24px; border-radius: 12px; font-weight: 600; display: flex; align-items: center;}
+.alert-error { background: #ffe5e5; color: #d63031; border: 1px solid #ff7675; }
+.alert-success { background: #e3f9e5; color: #00b894; border: 1px solid #55efc4; }
 
 /* =========================================
    6. HERO & ACCUEIL
    ========================================= */
 .hero {
     text-align: center;
-    padding: 80px 20px;
-    background: var(--card-bg); /* Remplace le gradient fixe par la couleur de carte */
-    border-radius: 12px;
-    box-shadow: 0 5px 20px var(--shadow);
-    margin-bottom: 50px;
+    padding: 100px 20px;
+    background: var(--card-bg);
+    border-radius: 24px;
+    box-shadow: var(--shadow-lg);
+    margin-bottom: 60px;
+    background-image: radial-gradient(circle at top right, rgba(255, 71, 87, 0.05), transparent);
 }
-.hero h1 { font-size: 3rem; margin-bottom: 20px; color: var(--text-color); }
-.hero p { font-size: 1.25rem; color: #7f8c8d; margin-bottom: 30px; }
+
+.hero h1 { 
+    font-size: 3.5rem; 
+    margin-bottom: 20px; 
+    color: var(--text-color); 
+    line-height: 1.2;
+    font-weight: 800;
+}
+.hero p { font-size: 1.3rem; color: var(--text-muted); margin-bottom: 40px; max-width: 600px; margin-left: auto; margin-right: auto;}
+.hero-buttons { display: flex; gap: 15px; justify-content: center; }
 
 .features {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 30px;
-    text-align: center;
+    text-align: left;
 }
 .feature-card {
-    padding: 30px;
-    transition: transform 0.2s;
+    padding: 40px 30px;
+    transition: transform 0.3s ease;
+    border: none;
+    box-shadow: var(--shadow-sm);
 }
-.feature-card:hover { transform: translateY(-5px); }
-.feature-card h3 { color: #2980b9; margin-bottom: 15px; }
+.feature-card:hover { transform: translateY(-8px); box-shadow: var(--shadow-md); }
+.feature-card h3 { color: var(--accent); margin-bottom: 15px; font-size: 1.4rem; }
+.feature-card p { color: var(--text-muted); }
 
 /* =========================================
-   7. GALERIE (Mode GRID Standard)
+   7. GALERIE (Modern Grid)
    ========================================= */
 .gallery-grid {
     display: grid;
-    /* C'est ICI que la magie opère pour le Responsive automatique */
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 30px;
     width: 100%;
-    padding-bottom: 50px; /* Un peu d'espace en bas pour le scroll */
+    padding-bottom: 60px;
 }
 
 .gallery-card {
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    /* Les couleurs et ombres sont déjà gérées par le bloc ".feature-card, .gallery-card..." plus haut */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: none; /* On retire la bordure visible */
+}
+
+.gallery-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
 }
 
 .gallery-card img {
     width: 100%;
-    aspect-ratio: 4/3; /* Force un format rectangulaire propre */
+    aspect-ratio: 4/3;
     object-fit: cover;
     display: block;
+    transition: transform 0.5s ease;
+}
+
+/* Zoom subtil sur l'image au survol de la carte */
+.gallery-card:hover img {
+    transform: scale(1.05);
+}
+
+.gallery-info {
+    padding: 15px 20px;
+    background: var(--card-bg);
+    position: relative;
+    z-index: 2; /* Pour rester au dessus de l'image si besoin */
+}
+
+.gallery-actions {
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.comment-list {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid var(--border);
+    font-size: 0.9rem;
+    color: var(--text-muted);
 }
 
 /* =========================================
-   8. TOAST NOTIFICATIONS (JS)
+   8. TOAST NOTIFICATIONS
    ========================================= */
 .toast {
     position: fixed;
-    top: 20px;
-    right: 20px;
-    background: #333;
-    color: #fff;
-    padding: 12px 24px;
-    border-radius: 4px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    top: 24px;
+    right: 24px;
+    background: var(--text-color);
+    color: var(--bg-color);
+    padding: 16px 28px;
+    border-radius: 12px;
+    box-shadow: var(--shadow-lg);
     z-index: 1000;
-    animation: slideIn 0.3s ease-out;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
-.toast-success { background: #27ae60; }
-.toast-error { background: #c0392b; }
+.toast-success { background: #00b894; color: white; }
+.toast-error { background: #ff4757; color: white; }
 
 @keyframes slideIn {
-    from { transform: translateX(100%); opacity: 0; }
+    from { transform: translateX(120%); opacity: 0; }
     to { transform: translateX(0); opacity: 1; }
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 /* =========================================
-   9. RESPONSIVE
+   9. EDITOR & RESPONSIVE
    ========================================= */
-/* Note: On a retiré les règles ".gallery-grid { column-count... }" car Grid gère ça tout seul maintenant ! */
-
-@media (max-width: 768px) {
-    .main-header { flex-direction: column; gap: 15px; }
-    .hero h1 { font-size: 2rem; }
+.video-wrapper {
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    background-color: #000;
 }
 
-.video-wrapper {
-    /* Empêche les comportements tactiles par défaut du navigateur sur cette zone */
-    touch-action: none; 
+#filters {
+    scrollbar-width: thin; /* Firefox */
+}
+#filters::-webkit-scrollbar { height: 6px; }
+#filters::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+
+@media (max-width: 768px) {
+    .main-header { flex-direction: column; gap: 15px; padding: 15px; }
+    .hero { padding: 60px 20px; }
+    .hero h1 { font-size: 2.2rem; }
+    .editor-container { flex-direction: column; }
 }
