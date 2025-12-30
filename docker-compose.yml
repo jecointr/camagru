@@ -9,7 +9,6 @@ services:
       - db
     env_file:
       - .env
-
     environment:
       APP_ENV: development # development or production
 
@@ -30,6 +29,12 @@ services:
     ports:
       - "1025:1025"
       - "8025:8025"
+
+  adminer: # Ajout du service Adminer
+    image: adminer
+    restart: always
+    ports:
+      - "8081:8080" # Adminer sera accessible sur le port 8081 de ta machine
 
 volumes:
   db_data:
