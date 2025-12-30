@@ -191,10 +191,17 @@
 
         // A. DESSINER L'IMAGE DE FOND (Webcam ou Upload)
         if (video && video.style.display !== 'none') {
-            // Capture Webcam
+            
+            // --- DEBUT MODIFICATION : Forcer l'effet miroir ---
+            context.save();
+            context.translate(canvas.width, 0); // On déplace le crayon tout à droite
+            context.scale(-1, 1); // On inverse le sens du dessin (Miroir)
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            context.restore(); // On remet normal pour la suite
+            // --- FIN MODIFICATION ---
+
         } else if (previewUpload && previewUpload.src) {
-            // Capture Upload
+            // Pour l'upload, on ne touche à rien (pas d'effet miroir voulu)
             context.drawImage(previewUpload, 0, 0, canvas.width, canvas.height);
         } else {
             showToast("Erreur : Aucune image source !", "error");
