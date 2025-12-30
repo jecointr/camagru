@@ -369,3 +369,46 @@ ul { list-style: none; }
     .hero h1 { font-size: 2.2rem; }
     .editor-container { flex-direction: column; }
 }
+
+/* =========================================
+   10. SHARE BUTTONS (Bonus Social)
+   ========================================= */
+.share-buttons {
+    display: inline-flex;
+    gap: 8px;
+    margin-left: auto; /* Pousse les boutons vers la droite */
+    padding-left: 15px;
+    border-left: 1px solid var(--border); /* Petite séparation visuelle */
+}
+
+.btn-share {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    text-decoration: none;
+    font-size: 1.1rem;
+    transition: transform 0.2s, opacity 0.2s;
+    background-color: var(--input-bg); /* Fond par défaut */
+}
+
+.btn-share:hover {
+    transform: translateY(-2px);
+    opacity: 0.9;
+    color: white; /* L'emoji reste coloré ou devient blanc selon OS, mais le fond change */
+}
+
+/* Couleurs des marques */
+.btn-share.tw:hover { background-color: #000000; } /* X (Twitter) Noir */
+.btn-share.fb:hover { background-color: #1877F2; } /* Facebook Blue */
+.btn-share.wa:hover { background-color: #25D366; } /* WhatsApp Green */
+
+/* Ajustement responsive pour la carte */
+.gallery-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Espace entre Likes et Partage */
+    flex-wrap: wrap;
+}

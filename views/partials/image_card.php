@@ -1,4 +1,14 @@
-<?php if (!isset($img)) return; ?>
+<?php 
+if (!isset($img)) return; 
+
+// 1. Construction de l'URL absolue de l'image (Dynamique)
+// En local ce sera http://localhost:8080/uploads/..., en prod ce sera https://monsite.com/...
+$protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
+$host = $_SERVER['HTTP_HOST'];
+$publicLink = $protocol . "://" . $host . "/uploads/" . htmlspecialchars($img['filename']);
+$encodedUrl = urlencode($publicLink);
+$encodedText = urlencode("Regarde ce montage sur Camagru ! 📸");
+?>
 
 <div class="gallery-card" data-id="<?= $img['id'] ?>">
      
@@ -26,7 +36,24 @@
                     <button type="submit">👍</button>
                 </form>
              <?php endif; ?>
-        </div>
+
+             <div class="share-buttons">
+                <a href="https://twitter.com/intent/tweet?text=<?= $encodedText ?>&url=<?= $encodedUrl ?>" 
+                   target="_blank" class="btn-share tw" title="Partager sur Twitter">
+                   🐦
+                </a>
+                
+                <a href="https://www.facebook.com/sharer/sharer.php?u=<?= $encodedUrl ?>" 
+                   target="_blank" class="btn-share fb" title="Partager sur Facebook">
+                   📘
+                </a>
+
+                <a href="https://api.whatsapp.com/send?text=<?= $encodedText ?>%20<?= $encodedUrl ?>" 
+                   target="_blank" class="btn-share wa" title="Partager sur WhatsApp">
+                   💬
+                </a>
+             </div>
+             </div>
         
         <div class="comments-section">
             <div class="comment-list" style="max-height: 100px; overflow-y: auto;">
@@ -38,7 +65,7 @@
                 <form action="/comment" method="POST" class="comment-form">
                     <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
                     <input type="hidden" name="image_id" value="<?= $img['id'] ?>">
-                    <input type="text" name="comment" required>
+                    <input type="text" name="comment" required placeholder="Ajouter un commentaire...">
                     <button type="submit">OK</button>
                 </form>
             <?php endif; ?>
