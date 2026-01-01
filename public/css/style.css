@@ -412,3 +412,57 @@ ul { list-style: none; }
     justify-content: space-between; /* Espace entre Likes et Partage */
     flex-wrap: wrap;
 }
+
+/* Boutons avec icônes (Poubelle, Like, Send) */
+.btn-icon {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 50%; /* Rond */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, color 0.2s;
+    color: var(--text-muted); /* Couleur par défaut */
+}
+
+.btn-icon:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: var(--text-color);
+}
+
+/* Bouton Supprimer spécifique */
+.btn-icon.delete {
+    background: rgba(255, 255, 255, 0.9);
+    color: #ff4757; /* Rouge */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+.btn-icon.delete:hover {
+    background: #ff4757;
+    color: white;
+}
+
+/* Bouton Like spécifique */
+.btn-icon.like:hover {
+    color: #0984e3; /* Bleu au survol */
+    background-color: rgba(9, 132, 227, 0.1);
+}
+
+/* Icônes dans les boutons de partage */
+.btn-share svg {
+    fill: currentColor; /* L'icône prend la couleur du texte */
+}
+
+/* Compteur de likes */
+.like-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px; /* Espace entre icône et nombre */
+    font-weight: 600;
+    color: var(--text-color);
+}
+.icon-heart {
+    fill: var(--accent); /* Cœur rempli */
+    stroke: none; /* Pas de bordure */
+}
