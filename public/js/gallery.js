@@ -1,7 +1,6 @@
 console.log("Gallery Script Loaded v6.0 (ID ONLY Mode)");
 
 function attachGalleryListeners() {
-    // Likes
     document.querySelectorAll('.like-form:not([data-listening])').forEach(form => {
         form.setAttribute('data-listening', 'true');
         form.addEventListener('submit', function(e) {
@@ -17,7 +16,6 @@ function attachGalleryListeners() {
         });
     });
 
-    // Comments
     document.querySelectorAll('.comment-form:not([data-listening])').forEach(form => {
         form.setAttribute('data-listening', 'true');
         form.addEventListener('submit', function(e) {
@@ -39,7 +37,6 @@ function attachGalleryListeners() {
         });
     });
 
-    // Delete
     document.querySelectorAll('.delete-form:not([data-listening])').forEach(form => {
         form.setAttribute('data-listening', 'true');
         form.addEventListener('submit', function(e) {
@@ -54,7 +51,6 @@ function attachGalleryListeners() {
                 .then(data => {
                     if (data.success) {
                         card.remove();
-                        // On force le rechargement immédiat
                         setTimeout(() => {
                             if (window.loadNextPage) window.loadNextPage(true);
                         }, 50);
@@ -79,7 +75,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const cards = document.querySelectorAll('.gallery-card');
         if (cards.length === 0) return;
         
-        // On ne prend que l'ID !
         const lastCard = cards[cards.length - 1];
         const lastId = lastCard.getAttribute('data-id');
 
@@ -88,7 +83,6 @@ document.addEventListener('DOMContentLoaded', () => {
         isLoading = true;
         if(loadingDiv) loadingDiv.style.display = 'block';
 
-        // URL Simplifiée
         const url = `/gallery?ajax=1&last_id=${lastId}`;
         
         fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
@@ -118,7 +112,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 isLoading = false;
                 if(loadingDiv) loadingDiv.style.display = 'none';
                 
-                // Si on a supprimé et qu'il reste de la place, on charge encore
                 if (hasMore && (force || document.body.offsetHeight < window.innerHeight)) {
                     loadNextPage();
                 }

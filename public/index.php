@@ -1,40 +1,31 @@
 <?php
 session_start();
 
-// On génère un token unique par session s'il n'existe pas encore
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
-// Définition des chemins absolus
 define('ROOT', dirname(__DIR__));
 define('CONTROLLERS', ROOT . '/controllers');
 define('VIEWS', ROOT . '/views');
 
-// Config BDD
 require_once ROOT . '/config/database.php';
 
-// Nettoyage de l'URL pour le routing
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-// Si l'app est dans un sous-dossier, on le retire
 $scriptDir = dirname($_SERVER['SCRIPT_NAME']);
 $path = str_replace($scriptDir, '', $uri);
-$path = '/' . ltrim($path, '/'); // Assure qu'on commence par /
+$path = '/' . ltrim($path, '/');
 
-// ROUTEUR
 switch ($path) {
-    // --- INFRA ---
     case '/setup':
         require ROOT . '/config/setup.php';
         break;
 
-    // --- ACCUEIL ---
     case '/':
     case '/home':
         require VIEWS . '/home.php';
         break;
 
-    // --- AUTHENTIFICATION ---
     case '/login':
         require CONTROLLERS . '/AuthController.php';
         (new AuthController())->login();
@@ -52,14 +43,13 @@ switch ($path) {
         (new AuthController())->verify();
         break;
         
-    // CORRECTION ICI : Noms des méthodes et route
     case '/forgot-password':
         require CONTROLLERS . '/AuthController.php';
-        (new AuthController())->forgot(); // Méthode renamed
+        (new AuthController())->forgot();
         break;
-    case '/reset': // Route renamed pour correspondre au lien du mail
+    case '/reset':
         require CONTROLLERS . '/AuthController.php';
-        (new AuthController())->reset(); // Méthode renamed
+        (new AuthController())->reset();
         break;
         
     case '/profile':
@@ -67,7 +57,6 @@ switch ($path) {
         (new AuthController())->profile();
         break;
 
-    // --- GALERIE ---
     case '/gallery':
         require CONTROLLERS . '/GalleryController.php';
         (new GalleryController())->index();
@@ -85,17 +74,15 @@ switch ($path) {
         (new GalleryController())->delete();
         break;
 
-    // --- EDITOR ---
     case '/editor':
         require CONTROLLERS . '/EditorController.php';
         (new EditorController())->index();
         break;
-    case '/save-image': // Pour l'AJAX
+    case '/save-image':
         require CONTROLLERS . '/EditorController.php';
         (new EditorController())->save();
         break;
 
-    // --- 404 ---
     default:
         http_response_code(404);
         if (file_exists(VIEWS . '/layout/header.php')) include VIEWS . '/layout/header.php';

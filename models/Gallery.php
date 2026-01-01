@@ -8,19 +8,15 @@ class Gallery {
         $this->db = Database::getInstance();
     }
 
-    // On a viré $lastTimestamp. On ne filtre que par ID.
     public function getImages($limit, $lastId = null) {
         $sql = "SELECT images.*, users.username 
                 FROM images 
                 JOIN users ON images.user_id = users.id ";
 
-        // LOGIQUE SIMPLE ET BETON :
-        // On veut juste les images avec un ID plus petit que le dernier affiché
         if ($lastId) {
             $sql .= "WHERE images.id < :lastId ";
         }
 
-        // Tri par ID décroissant (Le plus grand ID est forcément le plus récent)
         $sql .= "ORDER BY images.id DESC 
                  LIMIT :limit";
         

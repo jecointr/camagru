@@ -1,8 +1,6 @@
 <?php 
 if (!isset($img)) return; 
 
-// 1. Construction de l'URL absolue de l'image (Dynamique)
-// En local ce sera http://localhost:8080/uploads/..., en prod ce sera https://monsite.com/...
 $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
 $host = $_SERVER['HTTP_HOST'];
 $publicLink = $protocol . "://" . $host . "/uploads/" . htmlspecialchars($img['filename']);

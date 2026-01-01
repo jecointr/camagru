@@ -1,7 +1,6 @@
 <?php
 class ImageProcessor {
     
-    // Fusion Webcam (Similaire à avant, pas de changement majeur)
     public function mergeAndSave($base64_data, $filter_path, $user_id, $meta = null) {
         
         $data = explode(',', $base64_data);
@@ -51,16 +50,11 @@ class ImageProcessor {
         return $saved ? $filename : false;
     }
 
-    // --- GESTION UPLOAD PROFIL (NOUVEAU) ---
-    // Traite un fichier envoyé par formulaire ($_FILES)
     public function uploadProfilePicture($file) {
-        // 1. Erreurs d'upload
         if ($file['error'] !== UPLOAD_ERR_OK) return false;
         
-        // 2. Taille max (2MB)
         if ($file['size'] > 2 * 1024 * 1024) return false;
 
-        // 3. Type MIME (Sécurité)
         $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
         $finfo = finfo_open(FILEINFO_MIME_TYPE);
         $mime = finfo_file($finfo, $file['tmp_name']);
@@ -68,7 +62,6 @@ class ImageProcessor {
 
         if (!in_array($mime, $allowedTypes)) return false;
 
-        // 4. Création de la ressource image
         $src = null;
         switch ($mime) {
             case 'image/jpeg': $src = imagecreatefromjpeg($file['tmp_name']); break;
@@ -78,19 +71,16 @@ class ImageProcessor {
 
         if (!$src) return false;
 
-        // 5. Redimensionnement (Carré 150x150)
         $width = imagesx($src);
         $height = imagesy($src);
         $thumbSize = 150;
         $thumb = imagecreatetruecolor($thumbSize, $thumbSize);
 
-        // Transparence
         imagealphablending($thumb, false);
         imagesavealpha($thumb, true);
         $transparent = imagecolorallocatealpha($thumb, 255, 255, 255, 127);
         imagefilledrectangle($thumb, 0, 0, $thumbSize, $thumbSize, $transparent);
 
-        // Calcul du crop (Centrage)
         $srcX = 0; $srcY = 0;
         $smallestSide = min($width, $height);
         
@@ -102,7 +92,6 @@ class ImageProcessor {
 
         imagecopyresampled($thumb, $src, 0, 0, $srcX, $srcY, $thumbSize, $thumbSize, $smallestSide, $smallestSide);
 
-        // 6. Sauvegarde
         $filename = 'avatar_' . uniqid() . '.png';
         $uploadDir = __DIR__ . '/../public/uploads/';
         if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);

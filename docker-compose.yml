@@ -10,7 +10,7 @@ services:
     env_file:
       - .env
     environment:
-      APP_ENV: development # development or production
+      APP_ENV: development
 
   db:
     image: mariadb:11.8
@@ -30,11 +30,11 @@ services:
       - "1025:1025"
       - "8025:8025"
 
-  adminer: # Ajout du service Adminer
+  adminer:
     image: adminer
     restart: always
     ports:
-      - "8081:8080" # Adminer sera accessible sur le port 8081 de ta machine
+      - "8081:8080"
 
 volumes:
   db_data:

@@ -1,4 +1,3 @@
-// GESTION DES TOASTS (Remplacement des alerts)
 function showToast(message, type = 'success') {
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
@@ -11,12 +10,10 @@ function showToast(message, type = 'success') {
     }, 3000);
 }
 
-// GESTION DU DARK MODE
 document.addEventListener('DOMContentLoaded', () => {
     const toggleBtn = document.getElementById('theme-toggle');
     const savedTheme = localStorage.getItem('theme');
     
-    // Appliquer le thème sauvegardé
     if (savedTheme === 'dark') {
         document.body.setAttribute('data-theme', 'dark');
         if(toggleBtn) toggleBtn.innerText = '☀️';

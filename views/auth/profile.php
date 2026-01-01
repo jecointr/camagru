@@ -15,8 +15,6 @@
 
         <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 25px;">
             <?php 
-                // CORRECTION ICI :
-                // On vérifie si c'est une image custom ou l'image par défaut
                 $avatarSrc = (!empty($user['profile_pic']) && $user['profile_pic'] !== 'default_avatar.png')
                     ? '/uploads/' . $user['profile_pic'] 
                     : '/img/default_avatar.png'; 

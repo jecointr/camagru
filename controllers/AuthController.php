@@ -1,10 +1,9 @@
 <?php
 require_once __DIR__ . '/../models/User.php';
-require_once __DIR__ . '/../models/ImageProcessor.php'; // Nécessaire pour l'avatar
+require_once __DIR__ . '/../models/ImageProcessor.php';
 
 class AuthController {
 
-    // Méthode utilitaire pour vérifier le token CSRF
     private function checkCsrf() {
         if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
             die("Erreur de sécurité (CSRF) : Session invalide ou tentative d'intrusion.");
@@ -33,10 +32,8 @@ class AuthController {
                     $error = "Nom d'utilisateur ou email déjà utilisé.";
                 } else {
                     $token = bin2hex(random_bytes(32));
-                    // Note: Le modèle User ajoute désormais une image par défaut automatiquement
                     if ($userModel->create($username, $email, $password, $token)) {
                        
-                        // --- ENVOI DU MAIL ---
                         $link = "http://localhost:8080/verify?token=$token";
                         $subject = "Confirmez votre compte Camagru";
                         $message = "Bienvenue $username,\n\nCliquez sur ce lien pour activer votre compte :\n$link";
@@ -44,7 +41,6 @@ class AuthController {
 
                         mail($email, $subject, $message, $headers);
                         
-                        // Log pour debug (MailHog)
                         file_put_contents('php://stderr', "Email inscription envoyé à $email\n"); 
                        
                         header('Location: /login?msg=registered');
@@ -106,7 +102,6 @@ class AuthController {
         }
     }
 
-    // --- MOT DE PASSE OUBLIÉ (Demande) ---
     public function forgot() {
         $error = '';
         $success = '';
@@ -117,7 +112,6 @@ class AuthController {
 
             if ($email) {
                 $userModel = new User();
-                // setResetToken renvoie le token si l'email existe, sinon false
                 $token = $userModel->setResetToken($email);
 
                 if ($token) {
@@ -129,7 +123,6 @@ class AuthController {
                     mail($email, $subject, $message, $headers);
                     file_put_contents('php://stderr', "Email reset envoyé à $email\nLink: $link\n");
                 }
-                // Sécurité : On affiche le même message que l'email existe ou non (User Enumeration Prevention)
                 $success = "Si cet email existe, un lien de réinitialisation a été envoyé.";
             } else {
                 $error = "Email invalide.";
@@ -138,20 +131,17 @@ class AuthController {
         require __DIR__ . '/../views/auth/forgot.php';
     }
 
-    // --- MOT DE PASSE OUBLIÉ (Changement effectif) ---
     public function reset() {
         $error = '';
         $token = $_GET['token'] ?? null;
         $userModel = new User();
 
-        // 1. On vérifie d'abord si le token est valide (existe + pas expiré)
         $user = $userModel->verifyResetToken($token);
 
         if (!$user) {
             die("Ce lien de réinitialisation est invalide ou a expiré.");
         }
 
-        // 2. Traitement du formulaire
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $this->checkCsrf();
             $password = $_POST['password'];
@@ -173,7 +163,6 @@ class AuthController {
         require __DIR__ . '/../views/auth/reset.php';
     }
 
-    // --- PROFIL (Avec gestion Avatar) ---
     public function profile() {
         if (!isset($_SESSION['user_id'])) { header('Location: /login'); exit; }
        
@@ -181,7 +170,6 @@ class AuthController {
         $error = '';
         $success = '';
 
-        // Traitement du formulaire
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $this->checkCsrf();
            
@@ -189,10 +177,8 @@ class AuthController {
             $newEmail = filter_var($_POST['email'], FILTER_VALIDATE_EMAIL);
             $newPass = !empty($_POST['password']) ? $_POST['password'] : null;
 
-            // 1. Gestion de l'Upload d'Avatar
             if (isset($_FILES['avatar']) && $_FILES['avatar']['error'] === UPLOAD_ERR_OK) {
                 $processor = new ImageProcessor();
-                // uploadProfilePicture redimensionne et vérifie la sécurité
                 $filename = $processor->uploadProfilePicture($_FILES['avatar']);
                 
                 if ($filename) {
@@ -204,13 +190,11 @@ class AuthController {
                 }
             }
 
-            // 2. Validation des champs textes
             if (!$newUsername || !$newEmail) {
                 $error .= "Champs obligatoires manquants.";
             } elseif ($newPass && (strlen($newPass) < 8 || !preg_match("/[A-Z]/", $newPass) || !preg_match("/[0-9]/", $newPass))) {
                 $error .= "Le nouveau mot de passe ne respecte pas les critères.";
             } else {
-                // 3. Update BDD
                 $res = $userModel->update($_SESSION['user_id'], $newUsername, $newEmail, $newPass);
                 
                 if ($res === "EXISTS") {
@@ -224,7 +208,6 @@ class AuthController {
             }
         }
 
-        // Récupération des infos (y compris profile_pic) pour l'affichage
         $user = $userModel->getById($_SESSION['user_id']);
         require __DIR__ . '/../views/auth/profile.php';
     }

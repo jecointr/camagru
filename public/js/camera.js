@@ -1,7 +1,6 @@
 (function() {
     console.log("📷 Camagru Studio v3.1 (Pro) Loaded");
 
-    // Récupération des éléments du DOM
     const video = document.getElementById('video');
     const canvas = document.getElementById('canvas');
     const snapBtn = document.getElementById('snap');
@@ -10,48 +9,33 @@
     const thumbnails = document.getElementById('thumbnails');
     const overlay = document.getElementById('filter-overlay');
 
-    // Vérification basique
     if (!video || !canvas || !snapBtn) {
         console.error("❌ Éléments critiques manquants dans le HTML.");
         return;
     }
     
-    // Variables pour le Drag & Drop
     let isDragging = false;
     let startX, startY, initialLeft, initialTop;
     
-    // --- 1. GESTION DU DRAG & DROP (SOURIS + TACTILE) ---
     if (overlay) {
         overlay.style.cursor = "move";
         
-        // Variables locales pour les dimensions
         let containerWidth, containerHeight;
         let stickerWidth, stickerHeight;
 
-        // CONFIGURATION DES LIMITES (Optimisation Performance)
-        // scaleX/Y : 1.0 = Strict (le bord de l'image touche le bord de l'écran)
-        // scaleX/Y : 0.1 = Très tolérant (l'objet peut presque sortir entièrement)
         const stickerConfigs = {
-            // Lunettes : Très plates. On veut pouvoir les monter/descendre librement (0.10)
-            // mais on garde les côtés assez stricts (0.70)
             'glasses.png': { scaleX: 0.70, scaleY: 0.10 }, 
 
-            // Chapeau : On veut qu'il puisse dépasser en haut (0.10)
             'hat.png':     { scaleX: 0.60, scaleY: 0.10 }, 
 
-            // Cadre : Lui doit rester bloqué strictement car il fait tout le tour
             'frame.png':   { scaleX: 1.00, scaleY: 1.00 },
 
-            // Défaut : Tolérance moyenne
             'default':     { scaleX: 0.80, scaleY: 0.50 }
         };
-
-        // --- Fonctions Logiques Communes ---
 
         const dragStart = (clientX, clientY) => {
             isDragging = true;
             
-            // On met à jour les dimensions au début du click/touch
             const container = overlay.parentElement;
             containerWidth = container.offsetWidth;
             containerHeight = container.offsetHeight;
@@ -71,30 +55,25 @@
             const dx = clientX - startX;
             const dy = clientY - startY;
 
-            // 1. Position théorique (Centre du sticker)
             let newLeft = initialLeft + dx;
             let newTop = initialTop + dy;
 
-            // 2. Récupération de la config spécifique au sticker actif
             const currentFilterInput = document.querySelector('input[name="filter"]:checked');
             const filename = currentFilterInput ? currentFilterInput.value : 'default';
             const conf = stickerConfigs[filename] || stickerConfigs['default'];
 
-            // 3. Calcul de la Hitbox effective (Zone de collision)
             const realHalfWidth = stickerWidth / 2;
             const realHalfHeight = stickerHeight / 2;
 
             const effectiveHalfW = realHalfWidth * conf.scaleX;
             const effectiveHalfH = realHalfHeight * conf.scaleY;
 
-            // 4. Définition des murs de la "Prison"
             const minX = effectiveHalfW;
             const maxX = containerWidth - effectiveHalfW;
             
             const minY = effectiveHalfH;
             const maxY = containerHeight - effectiveHalfH;
 
-            // 5. Application des bornes (Clamping)
             newLeft = Math.max(minX, Math.min(newLeft, maxX));
             newTop = Math.max(minY, Math.min(newTop, maxY));
 
@@ -106,8 +85,6 @@
             isDragging = false;
             overlay.style.cursor = "move";
         };
-
-        // --- Écouteurs d'événements SOURIS (PC) ---
         
         overlay.addEventListener('mousedown', (e) => {
             e.preventDefault();
@@ -120,21 +97,15 @@
 
         document.addEventListener('mouseup', dragEnd);
 
-
-        // --- Écouteurs d'événements TACTILES (Mobile) ---
-
         overlay.addEventListener('touchstart', (e) => {
-            // e.preventDefault() est CRUCIAL ici pour empêcher 
-            // le scroll de la page quand on touche le sticker
             if(e.cancelable) e.preventDefault(); 
             
             const touch = e.touches[0];
             dragStart(touch.clientX, touch.clientY);
-        }, { passive: false }); // 'passive: false' permet d'utiliser preventDefault
+        }, { passive: false });
 
         document.addEventListener('touchmove', (e) => {
             if (!isDragging) return;
-            // On empêche le scroll pendant qu'on déplace le sticker
             if(e.cancelable) e.preventDefault();
             
             const touch = e.touches[0];
@@ -144,7 +115,6 @@
         document.addEventListener('touchend', dragEnd);
     }
 
-    // --- 2. INITIALISATION WEBCAM ---
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         navigator.mediaDevices.getUserMedia({ video: true })
         .then(stream => {
@@ -159,7 +129,6 @@
         });
     }
 
-    // --- 3. ACTIVATION DU FILTRE (Au clic sur un sticker) ---
     window.enableSnap = function() {
         snapBtn.disabled = false;
         snapBtn.style.opacity = "1";
@@ -168,15 +137,12 @@
         const filterInput = document.querySelector('input[name="filter"]:checked');
         if (filterInput && overlay) {
             overlay.src = '/img/filters/' + filterInput.value;
-            overlay.style.display = 'block';
-            
-            // On le remet au centre par défaut quand on change de filtre
+            overlay.style.display = 'block';            
             overlay.style.top = '50%';
             overlay.style.left = '50%';
         }
     }
 
-    // --- 4. PRISE DE PHOTO (Capture + Calculs) ---
     snapBtn.addEventListener('click', function(ev){
         ev.preventDefault();
         
@@ -184,24 +150,18 @@
 
         const context = canvas.getContext('2d');
         
-        // On fixe la taille interne du canvas (taille de traitement)
-        // C'est cette taille qui sera envoyée au serveur (640x480)
         canvas.width = 640;
         canvas.height = 480;
 
-        // A. DESSINER L'IMAGE DE FOND (Webcam ou Upload)
         if (video && video.style.display !== 'none') {
             
-            // --- DEBUT MODIFICATION : Forcer l'effet miroir ---
             context.save();
-            context.translate(canvas.width, 0); // On déplace le crayon tout à droite
-            context.scale(-1, 1); // On inverse le sens du dessin (Miroir)
+            context.translate(canvas.width, 0);
+            context.scale(-1, 1);
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
-            context.restore(); // On remet normal pour la suite
-            // --- FIN MODIFICATION ---
+            context.restore();
 
         } else if (previewUpload && previewUpload.src) {
-            // Pour l'upload, on ne touche à rien (pas d'effet miroir voulu)
             context.drawImage(previewUpload, 0, 0, canvas.width, canvas.height);
         } else {
             showToast("Erreur : Aucune image source !", "error");
@@ -209,32 +169,20 @@
         }
 
         const data = canvas.toDataURL('image/png');
-        
-        // B. CALCULER LA POSITION RELATIVE DU FILTRE
-        // Le filtre est positionné en CSS (pixels écran). 
-        // Il faut convertir ça en pixels image (640x480).
-        
         const container = document.querySelector('.video-wrapper');
-        // Taille actuelle affichée à l'écran
         const contW = container.offsetWidth; 
-        const contH = container.offsetHeight;
-        
-        // Position du filtre par rapport au conteneur (centré sur son propre milieu)
+        const contH = container.offsetHeight;        
         const filterLeft = overlay.offsetLeft - (overlay.offsetWidth / 2);
         const filterTop = overlay.offsetTop - (overlay.offsetHeight / 2);
         
-        // Facteur d'échelle (Ratio Image Réelle / Image Écran)
         const scaleX = 640 / contW;
         const scaleY = 480 / contH;
 
-        // Construction du paquet de données pour le serveur
         const payload = {
             image: data,
             filter: document.querySelector('input[name="filter"]:checked').value,
-            // 👇 Protection CSRF (Importante !)
             csrf_token: (typeof CSRF_TOKEN !== 'undefined') ? CSRF_TOKEN : '',
             
-            // 👇 Données de position pour le PHP
             meta: {
                 x: Math.round(filterLeft * scaleX),
                 y: Math.round(filterTop * scaleY),
@@ -246,21 +194,19 @@
         sendImage(payload);
     });
 
-    // --- 5. ENVOI AJAX AU SERVEUR ---
     function sendImage(payload) {
         fetch('/save-image', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         })
-        .then(res => res.text()) // On lit en text pour debug si erreur HTML
+        .then(res => res.text())
         .then(text => {
             try { return JSON.parse(text); } 
             catch (e) { throw new Error("Réponse serveur invalide: " + text); }
         })
         .then(data => {
             if (data.success) {
-                // Succès : Toast vert + Ajout miniature
                 if (typeof showToast === "function") showToast("Montage sauvegardé ! 🎨");
                 else alert("Sauvegardé !");
                 
@@ -269,7 +215,6 @@
                 div.innerHTML = `<img src="/uploads/${data.filename}" style="width:100%;">`;
                 if (thumbnails) thumbnails.prepend(div);
             } else {
-                // Erreur : Toast rouge
                 if (typeof showToast === "function") showToast("Erreur: " + data.error, "error");
                 else alert("Erreur: " + data.error);
             }
@@ -277,16 +222,14 @@
         .catch(err => console.error("Erreur Fetch:", err));
     }
     
-    // --- 6. GESTION DE L'UPLOAD DE FICHIER ---
     if (uploadInput) {
          uploadInput.addEventListener('change', function(e){
             const file = e.target.files[0];
             if (file) {
-                enableSnap(); // Active le bouton photo
+                enableSnap();
                 const reader = new FileReader();
                 
                 reader.onload = function(ev) {
-                    // Affiche l'image uploadée à la place de la vidéo
                     previewUpload.src = ev.target.result;
                     previewUpload.style.display = 'block';
                     if (video) video.style.display = 'none';

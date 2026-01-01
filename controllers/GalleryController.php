@@ -15,7 +15,6 @@ class GalleryController {
         $galleryModel = new Gallery();
         $limit = 6;
         
-        // On récupère JUSTE le last_id
         $lastId = isset($_GET['last_id']) ? (int)$_GET['last_id'] : null;
 
         $images = $galleryModel->getImages($limit, $lastId);
@@ -47,7 +46,6 @@ class GalleryController {
         require VIEWS . '/gallery.php';
     }
 
-    // ... (Garde tes fonctions like, comment, delete inchangées ci-dessous) ...
     public function like() {
         $this->checkCsrf();
         header('Content-Type: application/json');

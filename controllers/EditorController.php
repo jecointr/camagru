@@ -22,7 +22,6 @@ class EditorController {
 
         $input = json_decode(file_get_contents('php://input'), true);
 
-        // --- SÉCURITÉ CSRF ---
         if (!isset($input['csrf_token']) || $input['csrf_token'] !== $_SESSION['csrf_token']) {
             echo json_encode(['success' => false, 'error' => 'Erreur CSRF']);
             exit;
@@ -36,10 +35,8 @@ class EditorController {
         $processor = new ImageProcessor();
         $filterPath = ROOT . '/public/img/filters/' . basename($input['filter']);
 
-        // --- AJOUT : Récupération des métadonnées (positions) ---
         $meta = isset($input['meta']) ? $input['meta'] : null;
 
-        // Appel avec $meta
         $filename = $processor->mergeAndSave($input['image'], $filterPath, $_SESSION['user_id'], $meta);
 
         if ($filename) {
