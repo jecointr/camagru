@@ -34,7 +34,8 @@ class AuthController {
                     $token = bin2hex(random_bytes(32));
                     if ($userModel->create($username, $email, $password, $token)) {
                        
-                        $link = "http://localhost:8080/verify?token=$token";
+                        $appUrl = rtrim($_ENV['APP_URL'] ?? 'http://localhost:8080', '/');
+                        $link = "$appUrl/verify?token=$token";
                         $subject = "Confirmez votre compte Camagru";
                         $message = "Bienvenue $username,\n\nCliquez sur ce lien pour activer votre compte :\n$link";
                         $headers = "From: no-reply@camagru.fr";
@@ -71,6 +72,7 @@ class AuthController {
             if ($result === "NOT_VERIFIED") {
                 $error = "Veuillez vérifier votre email avant de vous connecter.";
             } elseif ($result) {
+                session_regenerate_id(true);
                 $_SESSION['user_id'] = $result['id'];
                 $_SESSION['username'] = $result['username'];
                 header('Location: /');
@@ -112,7 +114,8 @@ class AuthController {
                 $token = $userModel->setResetToken($email);
 
                 if ($token) {
-                    $link = "http://localhost:8080/reset?token=$token";
+                    $appUrl = rtrim($_ENV['APP_URL'] ?? 'http://localhost:8080', '/');
+                    $link = "$appUrl/reset?token=$token";
                     $subject = "Reinitialisation de votre mot de passe";
                     $message = "Bonjour,\n\nPour changer votre mot de passe, cliquez ici :\n$link\n\nCe lien expire dans 1 heure.";
                     $headers = "From: no-reply@camagru.fr";
