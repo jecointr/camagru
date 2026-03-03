@@ -40,9 +40,6 @@ class AuthController {
                         $headers = "From: no-reply@camagru.fr";
 
                         mail($email, $subject, $message, $headers);
-                        
-                        file_put_contents('php://stderr', "Email inscription envoyé à $email\n"); 
-                       
                         header('Location: /login?msg=registered');
                         exit;
                     } else {
@@ -121,7 +118,6 @@ class AuthController {
                     $headers = "From: no-reply@camagru.fr";
 
                     mail($email, $subject, $message, $headers);
-                    file_put_contents('php://stderr', "Email reset envoyé à $email\nLink: $link\n");
                 }
                 $success = "Si cet email existe, un lien de réinitialisation a été envoyé.";
             } else {
