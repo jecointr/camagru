@@ -1,7 +1,7 @@
 </main>
 
     <footer class="main-footer">
-        <p>&copy; <?= date('Y') ?> Camagru - Projet 42. Tous droits réservés.</p>
+        <p>&copy; <?= date('Y') ?> Camagru - 42 Project. All rights reserved.</p>
     </footer>
 </body>
 </html>

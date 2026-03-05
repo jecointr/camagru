@@ -5,7 +5,7 @@ $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "
 $host = $_SERVER['HTTP_HOST'];
 $publicLink = $protocol . "://" . $host . "/uploads/" . htmlspecialchars($img['filename']);
 $encodedUrl = urlencode($publicLink);
-$encodedText = urlencode("Regarde ce montage sur Camagru ! 📸");
+$encodedText = urlencode("Check out this creation on Camagru! 📸");
 ?>
 
 <div class="gallery-card" data-id="<?= $img['id'] ?>">
@@ -25,7 +25,7 @@ $encodedText = urlencode("Regarde ce montage sur Camagru ! 📸");
     </div>
 
     <div class="gallery-info">
-        <p style="color: var(--text-muted); font-size: 0.9em;">Par <strong><?= htmlspecialchars($img['username']) ?></strong></p>
+        <p style="color: var(--text-muted); font-size: 0.9em;">By <strong><?= htmlspecialchars($img['username']) ?></strong></p>
         
         <div class="gallery-actions">
              <span class="like-count">
@@ -71,7 +71,7 @@ $encodedText = urlencode("Regarde ce montage sur Camagru ! 📸");
                 <form action="/comment" method="POST" class="comment-form">
                     <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
                     <input type="hidden" name="image_id" value="<?= $img['id'] ?>">
-                    <input type="text" name="comment" required placeholder="Ajouter un commentaire...">
+                    <input type="text" name="comment" required placeholder="Add a comment...">
                     <button type="submit" title="Envoyer">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
                     </button>

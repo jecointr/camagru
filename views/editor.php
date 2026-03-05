@@ -17,34 +17,34 @@
 
             <div class="controls" style="margin-top: 20px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
                 
-                <h3>1. Choisissez un filtre (Obligatoire)</h3>
+                <h3>1. Choose a filter (required)</h3>
                 <div id="filters" style="display: flex; gap: 15px; margin: 15px 0; overflow-x: auto; padding-bottom: 5px;">
                     
                     <label style="cursor: pointer; border: 2px solid #ddd; padding: 10px; border-radius: 4px; display: flex; flex-direction: column; align-items: center; min-width: 80px;">
-                        <input type="radio" name="filter" value="glasses.png" onchange="enableSnap()"> 
-                        <img src="/img/filters/glasses.png" alt="Lunettes" style="width: 50px; margin-top: 5px;">
-                        <span style="font-size: 0.8em; margin-top: 5px;">🕶️ Lunettes</span>
+                        <input type="radio" name="filter" value="glasses.png" onchange="enableSnap()">
+                        <img src="/img/filters/glasses.png" alt="Glasses" style="width: 50px; margin-top: 5px;">
+                        <span style="font-size: 0.8em; margin-top: 5px;">🕶️ Glasses</span>
                     </label>
 
                     <label style="cursor: pointer; border: 2px solid #ddd; padding: 10px; border-radius: 4px; display: flex; flex-direction: column; align-items: center; min-width: 80px;">
                         <input type="radio" name="filter" value="hat.png" onchange="enableSnap()">
-                        <img src="/img/filters/hat.png" alt="Chapeau" style="width: 50px; margin-top: 5px;">
-                        <span style="font-size: 0.8em; margin-top: 5px;">🎩 Chapeau</span>
+                        <img src="/img/filters/hat.png" alt="Hat" style="width: 50px; margin-top: 5px;">
+                        <span style="font-size: 0.8em; margin-top: 5px;">🎩 Hat</span>
                     </label>
 
                     <label style="cursor: pointer; border: 2px solid #ddd; padding: 10px; border-radius: 4px; display: flex; flex-direction: column; align-items: center; min-width: 80px;">
                         <input type="radio" name="filter" value="frame.png" onchange="enableSnap()">
-                        <img src="/img/filters/frame.png" alt="Cadre" style="width: 50px; margin-top: 5px;">
-                        <span style="font-size: 0.8em; margin-top: 5px;">🖼️ Cadre</span>
+                        <img src="/img/filters/frame.png" alt="Frame" style="width: 50px; margin-top: 5px;">
+                        <span style="font-size: 0.8em; margin-top: 5px;">🖼️ Frame</span>
                     </label>
                 </div>
 
                 <h3>2. Capture</h3>
                 <div style="display: flex; align-items: center; gap: 15px;">
-                    <button id="snap" class="btn btn-blue" disabled style="opacity: 0.5; cursor: not-allowed;">📸 Prendre la photo</button>
-                    
+                    <button id="snap" class="btn btn-blue" disabled style="opacity: 0.5; cursor: not-allowed;">📸 Take photo</button>
+
                     <div style="border-left: 1px solid #ddd; padding-left: 15px;">
-                        <p style="margin-bottom: 5px; font-size: 0.9em;">Pas de webcam ?</p>
+                        <p style="margin-bottom: 5px; font-size: 0.9em;">No webcam?</p>
                         <input type="file" id="upload-file" accept="image/*">
                     </div>
                 </div>
@@ -52,7 +52,7 @@
         </div>
 
         <div class="side-section" style="flex: 1; background: white; padding: 15px; border-radius: 8px; height: fit-content; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-            <h3>Vos créations</h3>
+            <h3>Your creations</h3>
             <div id="thumbnails" style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
                 
                 <?php if (isset($images) && !empty($images)): ?>
@@ -62,7 +62,7 @@
                         </div>
                     <?php endforeach; ?>
                 <?php else: ?>
-                    <p style="color: #777; font-size: 0.9rem;" id="no-img-msg">Aucune image pour l'instant.</p>
+                    <p style="color: #777; font-size: 0.9rem;" id="no-img-msg">No images yet.</p>
                 <?php endif; ?>
 
             </div>

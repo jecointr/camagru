@@ -9,6 +9,10 @@ class EditorController {
             header('Location: /login');
             exit;
         }
+        $db = Database::getInstance();
+        $stmt = $db->prepare("SELECT filename FROM images WHERE user_id = ? ORDER BY id DESC");
+        $stmt->execute([$_SESSION['user_id']]);
+        $images = $stmt->fetchAll();
         require VIEWS . '/editor.php';
     }
 
@@ -16,19 +20,19 @@ class EditorController {
         header('Content-Type: application/json');
 
         if (!isset($_SESSION['user_id'])) {
-            echo json_encode(['success' => false, 'error' => 'Session expirée']);
+            echo json_encode(['success' => false, 'error' => 'Session expired']);
             exit;
         }
 
         $input = json_decode(file_get_contents('php://input'), true);
 
         if (!isset($input['csrf_token']) || $input['csrf_token'] !== $_SESSION['csrf_token']) {
-            echo json_encode(['success' => false, 'error' => 'Erreur CSRF']);
+            echo json_encode(['success' => false, 'error' => 'CSRF error']);
             exit;
         }
 
         if (!isset($input['image']) || !isset($input['filter'])) {
-            echo json_encode(['success' => false, 'error' => 'Données manquantes']);
+            echo json_encode(['success' => false, 'error' => 'Missing data']);
             exit;
         }
 
@@ -47,10 +51,10 @@ class EditorController {
 
                 echo json_encode(['success' => true, 'filename' => $filename]);
             } catch (PDOException $e) {
-                echo json_encode(['success' => false, 'error' => 'Erreur BDD']);
+                echo json_encode(['success' => false, 'error' => 'Database error']);
             }
         } else {
-            echo json_encode(['success' => false, 'error' => 'Erreur traitement image']);
+            echo json_encode(['success' => false, 'error' => 'Image processing error']);
         }
     }
 }

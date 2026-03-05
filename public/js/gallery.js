@@ -41,7 +41,7 @@ function attachGalleryListeners() {
         form.setAttribute('data-listening', 'true');
         form.addEventListener('submit', function(e) {
             e.preventDefault();
-            if (!confirm('Supprimer ?')) return;
+            if (!confirm('Delete this image?')) return;
 
             const card = this.closest('.gallery-card');
             const params = new URLSearchParams(new FormData(this));
@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 try {
                     return JSON.parse(text);
                 } catch (e) {
-                    console.error("Erreur JSON:", text);
+                    console.error("JSON parse error:", text);
                     return { success: false };
                 }
             })

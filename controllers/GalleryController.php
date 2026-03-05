@@ -6,7 +6,7 @@ class GalleryController {
     private function checkCsrf() {
         if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
             header('Content-Type: application/json');
-            echo json_encode(['success' => false, 'error' => 'Erreur CSRF']);
+            echo json_encode(['success' => false, 'error' => 'CSRF error']);
             exit;
         }
     }
@@ -68,7 +68,7 @@ class GalleryController {
             if ($model->addComment($_SESSION['user_id'], $_POST['image_id'], htmlspecialchars($_POST['comment']))) {
                  $owner = $model->getImageOwner($_POST['image_id']);
                  if ($owner && $owner['notification_active'] && $owner['email']) {
-                     mail($owner['email'], "Commentaire Camagru", "Nouveau com", "From: no-reply@camagru.fr");
+                     mail($owner['email'], "New comment on Camagru", "Someone commented on your photo.", "From: no-reply@camagru.fr");
                  }
                  echo json_encode(['success'=>true, 'comment'=>htmlspecialchars($_POST['comment']), 'username'=>$_SESSION['username']]); exit;
             }

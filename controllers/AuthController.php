@@ -6,7 +6,7 @@ class AuthController {
 
     private function checkCsrf() {
         if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
-            die("Erreur de sécurité (CSRF) : Session invalide ou tentative d'intrusion.");
+            die("Security error (CSRF): invalid session or intrusion attempt.");
         }
     }
     
@@ -24,19 +24,19 @@ class AuthController {
             $password = $_POST['password'];
 
             if (strlen($password) < 8 || !preg_match("/[A-Z]/", $password) || !preg_match("/[0-9]/", $password)) {
-                $error = "Le mot de passe doit contenir 8 caractères, une majuscule et un chiffre.";
+                $error = "Password must be at least 8 characters with one uppercase letter and one number.";
             } elseif ($username && $email && $password) {
                 $userModel = new User();
-               
+
                 if ($userModel->userExists($username, $email)) {
-                    $error = "Nom d'utilisateur ou email déjà utilisé.";
+                    $error = "Username or email already taken.";
                 } else {
                     $token = bin2hex(random_bytes(32));
                     if ($userModel->create($username, $email, $password, $token)) {
                        
                         $link = "http://localhost:8080/verify?token=$token";
-                        $subject = "Confirmez votre compte Camagru";
-                        $message = "Bienvenue $username,\n\nCliquez sur ce lien pour activer votre compte :\n$link";
+                        $subject = "Confirm your Camagru account";
+                        $message = "Welcome $username,\n\nClick the link below to activate your account:\n$link";
                         $headers = "From: no-reply@camagru.fr";
 
                         mail($email, $subject, $message, $headers);
@@ -46,11 +46,11 @@ class AuthController {
                         header('Location: /login?msg=registered');
                         exit;
                     } else {
-                        $error = "Erreur lors de l'inscription.";
+                        $error = "An error occurred during registration.";
                     }
                 }
             } else {
-                $error = "Données invalides.";
+                $error = "Invalid data.";
             }
         }
         require __DIR__ . '/../views/auth/register.php';
@@ -72,14 +72,14 @@ class AuthController {
             $result = $userModel->login($username, $password);
 
             if ($result === "NOT_VERIFIED") {
-                $error = "Veuillez vérifier votre email avant de vous connecter.";
+                $error = "Please verify your email address before logging in.";
             } elseif ($result) {
                 $_SESSION['user_id'] = $result['id'];
                 $_SESSION['username'] = $result['username'];
                 header('Location: /');
                 exit;
             } else {
-                $error = "Identifiants incorrects.";
+                $error = "Incorrect username or password.";
             }
         }
         require __DIR__ . '/../views/auth/login.php';
@@ -97,7 +97,7 @@ class AuthController {
             if ($userModel->verifyAccount($_GET['token'])) {
                 header('Location: /login?msg=verified');
             } else {
-                echo "Lien invalide ou expiré.";
+                echo "Invalid or expired verification link.";
             }
         }
     }
@@ -116,16 +116,16 @@ class AuthController {
 
                 if ($token) {
                     $link = "http://localhost:8080/reset?token=$token";
-                    $subject = "Reinitialisation de votre mot de passe";
-                    $message = "Bonjour,\n\nPour changer votre mot de passe, cliquez ici :\n$link\n\nCe lien expire dans 1 heure.";
+                    $subject = "Reset your Camagru password";
+                    $message = "Hello,\n\nClick the link below to reset your password:\n$link\n\nThis link expires in 1 hour.";
                     $headers = "From: no-reply@camagru.fr";
 
                     mail($email, $subject, $message, $headers);
                     file_put_contents('php://stderr', "Email reset envoyé à $email\nLink: $link\n");
                 }
-                $success = "Si cet email existe, un lien de réinitialisation a été envoyé.";
+                $success = "If this email exists, a reset link has been sent.";
             } else {
-                $error = "Email invalide.";
+                $error = "Invalid email address.";
             }
         }
         require __DIR__ . '/../views/auth/forgot.php';
@@ -139,7 +139,7 @@ class AuthController {
         $user = $userModel->verifyResetToken($token);
 
         if (!$user) {
-            die("Ce lien de réinitialisation est invalide ou a expiré.");
+            die("This reset link is invalid or has expired.");
         }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -148,15 +148,15 @@ class AuthController {
             $confirm = $_POST['password_confirm'];
 
             if ($password !== $confirm) {
-                $error = "Les mots de passe ne correspondent pas.";
+                $error = "Passwords do not match.";
             } elseif (strlen($password) < 8 || !preg_match("/[A-Z]/", $password) || !preg_match("/[0-9]/", $password)) {
-                $error = "Le mot de passe doit contenir 8 caractères, une majuscule et un chiffre.";
+                $error = "Password must be at least 8 characters with one uppercase letter and one number.";
             } else {
                 if ($userModel->resetPassword($token, $password)) {
                     header('Location: /login?msg=password_reset');
                     exit;
                 } else {
-                    $error = "Une erreur est survenue.";
+                    $error = "An error occurred. Please try again.";
                 }
             }
         }
@@ -176,6 +176,7 @@ class AuthController {
             $newUsername = htmlspecialchars($_POST['username']);
             $newEmail = filter_var($_POST['email'], FILTER_VALIDATE_EMAIL);
             $newPass = !empty($_POST['password']) ? $_POST['password'] : null;
+            $notificationActive = isset($_POST['notification_active']) ? 1 : 0;
 
             if (isset($_FILES['avatar']) && $_FILES['avatar']['error'] === UPLOAD_ERR_OK) {
                 $processor = new ImageProcessor();
@@ -184,26 +185,27 @@ class AuthController {
                 if ($filename) {
                     $userModel->updateAvatar($_SESSION['user_id'], $filename);
                     $_SESSION['profile_pic'] = $filename;
-                    $success .= "Photo de profil mise à jour. ";
+                    $success .= "Profile picture updated. ";
                 } else {
-                    $error .= "Erreur upload image (Format invalide ou trop lourd). ";
+                    $error .= "Image upload failed (invalid format or file too large). ";
                 }
             }
 
             if (!$newUsername || !$newEmail) {
-                $error .= "Champs obligatoires manquants.";
+                $error .= "Required fields are missing.";
             } elseif ($newPass && (strlen($newPass) < 8 || !preg_match("/[A-Z]/", $newPass) || !preg_match("/[0-9]/", $newPass))) {
-                $error .= "Le nouveau mot de passe ne respecte pas les critères.";
+                $error .= "New password must be at least 8 characters with one uppercase letter and one number.";
             } else {
+                $userModel->updateNotification($_SESSION['user_id'], $notificationActive);
                 $res = $userModel->update($_SESSION['user_id'], $newUsername, $newEmail, $newPass);
                 
                 if ($res === "EXISTS") {
-                    $error .= "Ce pseudo ou email est déjà pris.";
+                    $error .= "This username or email is already taken.";
                 } elseif ($res) {
-                    $success .= "Informations mises à jour !";
+                    $success .= "Profile updated successfully!";
                     $_SESSION['username'] = $newUsername;
                 } else {
-                    $error .= "Erreur lors de la mise à jour.";
+                    $error .= "An error occurred while updating your profile.";
                 }
             }
         }

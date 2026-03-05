@@ -87,8 +87,8 @@ switch ($path) {
         http_response_code(404);
         if (file_exists(VIEWS . '/layout/header.php')) include VIEWS . '/layout/header.php';
         echo "<div class='container' style='text-align:center; padding:50px;'>";
-        echo "<h1>404</h1><p>Oups ! Cette page n'existe pas.</p>";
-        echo "<a href='/' class='btn'>Retour à l'accueil</a>";
+        echo "<h1>404</h1><p>Oops! This page does not exist.</p>";
+        echo "<a href='/' class='btn'>Back to home</a>";
         echo "</div>";
         if (file_exists(VIEWS . '/layout/footer.php')) include VIEWS . '/layout/footer.php';
         break;

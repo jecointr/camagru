@@ -89,6 +89,11 @@ class User {
     }
 
 
+    public function updateNotification($userId, $active) {
+        $stmt = $this->db->prepare("UPDATE users SET notification_active = ? WHERE id = ?");
+        return $stmt->execute([(int)$active, $userId]);
+    }
+
     public function updateAvatar($userId, $filename) {
         $stmt = $this->db->prepare("UPDATE users SET profile_pic = ? WHERE id = ?");
         return $stmt->execute([$filename, $userId]);

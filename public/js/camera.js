@@ -124,7 +124,7 @@
         .catch(err => {
             console.error("⚠️ Webcam non disponible :", err);
             if (typeof showToast === 'function') {
-                showToast("Webcam inaccessible. Utilisez l'upload.", "error");
+                showToast("Webcam unavailable. Please use the upload option.", "error");
             }
         });
     }
@@ -164,7 +164,7 @@
         } else if (previewUpload && previewUpload.src) {
             context.drawImage(previewUpload, 0, 0, canvas.width, canvas.height);
         } else {
-            showToast("Erreur : Aucune image source !", "error");
+            showToast("Error: no image source found!", "error");
             return;
         }
 
@@ -203,23 +203,23 @@
         .then(res => res.text())
         .then(text => {
             try { return JSON.parse(text); } 
-            catch (e) { throw new Error("Réponse serveur invalide: " + text); }
+            catch (e) { throw new Error("Invalid server response: " + text); }
         })
         .then(data => {
             if (data.success) {
-                if (typeof showToast === "function") showToast("Montage sauvegardé ! 🎨");
-                else alert("Sauvegardé !");
-                
+                if (typeof showToast === "function") showToast("Image saved!");
+                else alert("Saved!");
+
                 const div = document.createElement('div');
                 div.className = 'thumb';
                 div.innerHTML = `<img src="/uploads/${data.filename}" style="width:100%;">`;
                 if (thumbnails) thumbnails.prepend(div);
             } else {
-                if (typeof showToast === "function") showToast("Erreur: " + data.error, "error");
-                else alert("Erreur: " + data.error);
+                if (typeof showToast === "function") showToast("Error: " + data.error, "error");
+                else alert("Error: " + data.error);
             }
         })
-        .catch(err => console.error("Erreur Fetch:", err));
+        .catch(err => console.error("Fetch error:", err));
     }
     
     if (uploadInput) {

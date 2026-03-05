@@ -1,8 +1,8 @@
 <?php include __DIR__ . '/../layout/header.php'; ?>
 
 <div class="auth-wrapper">
-    <h2>Inscription</h2>
-    
+    <h2>Sign up</h2>
+
     <?php if (isset($error) && $error): ?>
         <div class="alert alert-error"><?= $error ?></div>
     <?php endif; ?>
@@ -11,26 +11,26 @@
         <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
 
         <div class="form-group">
-            <label for="username">Nom d'utilisateur</label>
-            <input type="text" id="username" name="username" required placeholder="Ex: JeanDupont">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" required placeholder="e.g. JohnDoe">
         </div>
-        
+
         <div class="form-group">
-            <label for="email">Adresse Email</label>
-            <input type="email" id="email" name="email" required placeholder="Ex: jean@mail.com">
+            <label for="email">Email address</label>
+            <input type="email" id="email" name="email" required placeholder="e.g. john@mail.com">
         </div>
-        
+
         <div class="form-group">
-            <label for="password">Mot de passe</label>
+            <label for="password">Password</label>
             <input type="password" id="password" name="password" required>
-            <small>Min. 8 caractères, 1 majuscule, 1 chiffre.</small>
+            <small>Min. 8 characters, 1 uppercase letter, 1 number.</small>
         </div>
-        
-        <button type="submit" class="btn btn-blue" style="width: 100%;">S'inscrire</button>
+
+        <button type="submit" class="btn btn-blue" style="width: 100%;">Sign up</button>
     </form>
-    
+
     <p style="margin-top: 20px; text-align: center;">
-        Déjà un compte ? <a href="/login" style="color: #2980b9; font-weight: bold;">Se connecter</a>
+        Already have an account? <a href="/login" style="color: #2980b9; font-weight: bold;">Log in</a>
     </p>
 </div>
 
