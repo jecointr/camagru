@@ -29,7 +29,10 @@ function attachGalleryListeners() {
                     if (data.success) {
                         const list = this.closest('.gallery-info').querySelector('.comment-list');
                         const p = document.createElement('p');
-                        p.innerHTML = `<strong>${data.username}:</strong> ${data.comment}`;
+                        const strong = document.createElement('strong');
+                        strong.textContent = data.username + ' :';
+                        p.appendChild(strong);
+                        p.appendChild(document.createTextNode(' ' + data.comment));
                         list.appendChild(p);
                         input.value = '';
                     }

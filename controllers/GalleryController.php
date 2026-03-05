@@ -68,7 +68,9 @@ class GalleryController {
             if ($model->addComment($_SESSION['user_id'], $_POST['image_id'], htmlspecialchars($_POST['comment']))) {
                  $owner = $model->getImageOwner($_POST['image_id']);
                  if ($owner && $owner['notification_active'] && $owner['email']) {
-                     mail($owner['email'], "New comment on Camagru", "Someone commented on your photo.", "From: no-reply@camagru.fr");
+                    $commenter = htmlspecialchars($_SESSION['username']);
+                    $body = "Hello,\n\n$commenter commented on your photo:\n\n\"" . htmlspecialchars($_POST['comment']) . "\"\n\nLog in to Camagru to see the photo.";
+                    mail($owner['email'], "New comment on Camagru", $body, "From: no-reply@camagru.fr");
                  }
                  echo json_encode(['success'=>true, 'comment'=>htmlspecialchars($_POST['comment']), 'username'=>$_SESSION['username']]); exit;
             }
