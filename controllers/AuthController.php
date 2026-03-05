@@ -19,7 +19,7 @@ class AuthController {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $this->checkCsrf();
 
-            $username = htmlspecialchars($_POST['username']); 
+            $username = trim($_POST['username']);
             $email = filter_var($_POST['email'], FILTER_VALIDATE_EMAIL);
             $password = $_POST['password'];
 
@@ -75,6 +75,7 @@ class AuthController {
                 session_regenerate_id(true);
                 $_SESSION['user_id'] = $result['id'];
                 $_SESSION['username'] = $result['username'];
+                $_SESSION['profile_pic'] = $result['profile_pic'];
                 header('Location: /');
                 exit;
             } else {
@@ -172,7 +173,7 @@ class AuthController {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $this->checkCsrf();
            
-            $newUsername = htmlspecialchars($_POST['username']);
+            $newUsername = trim($_POST['username']);
             $newEmail = filter_var($_POST['email'], FILTER_VALIDATE_EMAIL);
             $newPass = !empty($_POST['password']) ? $_POST['password'] : null;
             $notificationActive = isset($_POST['notification_active']) ? 1 : 0;

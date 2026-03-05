@@ -23,7 +23,7 @@
                 <?php if (isset($_SESSION['user_id'])): ?>
                     <li style="margin-left: 15px; display: flex; align-items: center; gap: 10px;">
                         <a href="/profile" style="display: flex; align-items: center; text-decoration: none;">
-                            <img src="<?= isset($_SESSION['profile_pic']) && $_SESSION['profile_pic'] ? '/uploads/'.$_SESSION['profile_pic'] : '/img/default_avatar.png' ?>"
+                            <img src="<?= isset($_SESSION['profile_pic']) && $_SESSION['profile_pic'] && $_SESSION['profile_pic'] !== 'default_avatar.png' ? '/uploads/'.$_SESSION['profile_pic'] : '/img/default_avatar.png' ?>"
                                  alt="Avatar"
                                  style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover; border: 2px solid white;">
                             <span style="font-weight: bold; margin-left: 5px; color: #3498db;">

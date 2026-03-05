@@ -8,7 +8,6 @@
     const overlay = document.getElementById('filter-overlay');
 
     if (!video || !canvas || !snapBtn) {
-        console.error("❌ Éléments critiques manquants dans le HTML.");
         return;
     }
     

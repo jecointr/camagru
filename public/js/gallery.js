@@ -92,7 +92,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 try {
                     return JSON.parse(text);
                 } catch (e) {
-                    console.error("JSON parse error:", text);
                     return { success: false };
                 }
             })
