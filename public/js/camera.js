@@ -1,6 +1,4 @@
 (function() {
-    console.log("📷 Camagru Studio v3.1 (Pro) Loaded");
-
     const video = document.getElementById('video');
     const canvas = document.getElementById('canvas');
     const snapBtn = document.getElementById('snap');
@@ -219,20 +217,21 @@
                 else alert("Error: " + data.error);
             }
         })
-        .catch(err => console.error("Fetch error:", err));
+        .catch(() => {});
     }
     
     if (uploadInput) {
-         uploadInput.addEventListener('change', function(e){
+        uploadInput.addEventListener('change', function(e){
             const file = e.target.files[0];
             if (file) {
-                enableSnap();
-                const reader = new FileReader();
-                
+                const reader = new FileReader();    
                 reader.onload = function(ev) {
                     previewUpload.src = ev.target.result;
                     previewUpload.style.display = 'block';
                     if (video) video.style.display = 'none';
+                    if (document.querySelector('input[name="filter"]:checked')) {
+                        enableSnap();
+                    }
                 }
                 reader.readAsDataURL(file);
             }

@@ -1,5 +1,3 @@
-console.log("Gallery Script Loaded v6.0 (ID ONLY Mode)");
-
 function attachGalleryListeners() {
     document.querySelectorAll('.like-form:not([data-listening])').forEach(form => {
         form.setAttribute('data-listening', 'true');

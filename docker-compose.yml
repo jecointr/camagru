@@ -15,11 +15,13 @@ services:
   db:
     image: mariadb:11.8
     restart: always
+    env_file:
+      - .env
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: camagru
-      MYSQL_USER: camagru_user
-      MYSQL_PASSWORD: user_password
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
     volumes:
       - db_data:/var/lib/mysql
       - ./config/setup.sql:/docker-entrypoint-initdb.d/init.sql
